@@ -76,8 +76,11 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						for (var i = 0; i < local.items.length; i++) {
 							if (local.items[i].due_date) {
 								var newParsedDate = parseDate(now, Date.parse(local.items[i].due_date));
-								local.items[i].searchKey.replace(local.items[i].parsedDate, newParsedDate);
+								var newFullParsedDate = $filter('date')(local.items[i].due_date, "yyyy MMMM EEEE d");
+								local.items[i].searchKey.replace(local.items[i].parsedDate, newParsedDate)
+									.replace(local.items[i].fullParsedDate, newFullParsedDate);
 								local.items[i].parseDate = newParsedDate;
+								local.items[i].fullParsedDate = newFullParsedDate;
 							}
 						}
 						$scope.items = local.items;
@@ -150,7 +153,6 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 			chrome.storage.local.set({
 				'projects': $scope.projects
 			});
-			console.log("projects saved");
 		};
 
 		var getProjectIdWithName = function (name) {
@@ -190,6 +192,14 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 		};
 
 		$scope.todoistGet = function () {
+			// $http.get("https://todoist.com/API/v6/sync"), {
+			// 	params: {
+			// 		token: $scope.token,
+			// 		seq_no: 0,
+			// 		seq_no_global: 0,
+			// 		resource_types: '["all"]'
+			// 	}
+			// }
 			$http({
 					method: "GET",
 					url: "https://todoist.com/API/v6/sync",
@@ -197,16 +207,18 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						token: $scope.token,
 						seq_no: 0,
 						seq_no_global: 0,
-						resource_types: '["projects","items"]',
+						resource_types: '["items", "projects"]'
 					}
 				})
 				.success(function (data) {
+					// console.log(data);
 					var projectColors = ["#95ef63", "#ff8581", "#ffc471", "#f9ec75", "#a8c8e4", "#d2b8a3", "#e2a8e4", "#cccccc", "#fb886e", "#ffcc00", "#74e8d3", "#3bd5fb"];
 					var projectClone = {};
 					// if(!seq && !seq_g){
-						projectClone = JSON.parse(JSON.stringify($scope.projects));
-						$scope.projects = {};
+					projectClone = JSON.parse(JSON.stringify($scope.projects));
+					$scope.projects = {};
 					// }
+
 					for (var i = 0; i < data.Projects.length; i++) {
 						var visible;
 						if (!(data.Projects[i].id in projectClone)) {
@@ -226,22 +238,26 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						.getTime();
 					$scope.last_sync = now;
 
-					for (var i = 0; i < data.Items.length; i++) {
-						data.Items[i].project_name = $scope.projects[data.Items[i].project_id].name;
-						data.Items[i].color = $scope.projects[data.Items[i].project_id].color;
-						if (data.Items[i].due_date) {
-							data.Items[i].parsedDate = parseDate(now, Date.parse(data.Items[i].due_date));
+					for (var j = 0; j < data.Items.length; j++) {
+						var item = data.Items[j];
+						item.project_name = $scope.projects[item.project_id].name;
+						item.color = $scope.projects[item.project_id].color;
+						if (item.due_date) {
+							item.parsedDate = parseDate(now, Date.parse(item.due_date));
+							item.fullParsedDate = $filter('date')(Date.parse(item.due_date), 'yyyy MMMM EEEE d');
 						} else {
-							data.Items[i].parsedDate = "";
+							item.parsedDate = "";
+							item.fullParsedDate = "";
 						}
 
-						data.Items[i].searchKey = (data.Items[i].parsedDate + " " + data.Items[i].content + " " + data.Items[i].project_name)
+						item.searchKey = (item.parsedDate + " " + item.fullParsedDate + " " + item.content + " " + item.project_name)
 							.toLowerCase();
+						console.log(item.searchKey);
 					}
 					// if (!seq && !seq_g) {
-						$scope.items = data.Items;
+					$scope.items = data.Items;
 					// } else {
-						// $scope.items.push.apply($scope.items, data.Items);
+					// $scope.items.push.apply($scope.items, data.Items);
 					// }
 					seq = data.seq_no;
 					seq_g = data.seq_no_global;
@@ -270,7 +286,6 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 			} else {
 				projectName = "Inbox";
 			}
-			console.log(projectName);
 			var project_id = getOrCreateProjectIdWithName(projectName);
 			if (dateString) {
 				dateString = dateString.text;
@@ -399,20 +414,20 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						// 		if ($scope.items[i].id === key) {
 						// 			$scope.items[i].id = data.TempIdMapping[key];
 						// 		}
-								// if ($scope.items[i].project_id === key) {
-								// 	$scope.items[i].project_id = data.TempIdMapping[key];
-								// }
-							// }
-							// for (var proj in $scope.projects) {
-							// 	if (proj === key) {
-							// 		$scope.projects[key] = {
-							// 			name: $scope.projects[proj].name,
-							// 			visible: $scope.projects[proj].visible,
-							// 			color: $scope.projects[proj].color
-							// 		};
-							// 		delete $scope.projects[proj];
-							// 	}
-							// }
+						// if ($scope.items[i].project_id === key) {
+						// 	$scope.items[i].project_id = data.TempIdMapping[key];
+						// }
+						// }
+						// for (var proj in $scope.projects) {
+						// 	if (proj === key) {
+						// 		$scope.projects[key] = {
+						// 			name: $scope.projects[proj].name,
+						// 			visible: $scope.projects[proj].visible,
+						// 			color: $scope.projects[proj].color
+						// 		};
+						// 		delete $scope.projects[proj];
+						// 	}
+						// }
 						// }
 
 						console.log(data);

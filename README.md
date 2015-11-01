@@ -3,7 +3,7 @@ Simple [Todoist](https://todoist.com/) newtab chrome extension with offline capa
 
 ## Installation
 Download [endo.crx](https://raw.githubusercontent.com/enzosv/endo/master/endo.crx)
-Drag and drop to chrome [extensions page](chrome://extensions/)
+and drag and drop to chrome extensions page (chrome://extensions/)
 
 ## License
 
