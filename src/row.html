@@ -1,0 +1,17 @@
+<td style="height:64px;opacity:{{item.opacity}}">
+    <ul class="middle nav">
+        <li>
+            <button ng-click="complete()"style="background-color: transparent; color:{{item.color}}; padding-top:8px; border:none; height:32px; width:32px" class="fa fa-square-o fa-2x pull-left" ng-hide="item.completed"></button>
+
+            <button ng-click="uncomplete()"style="background-color: transparent; color:{{item.color}}; padding-top:8px; border:none; height:32px; width:32px" class="fa fa-check-square-o fa-2x pull-left" ng-show="item.completed"></button>
+
+            {{item.content}}
+            <small ng-show="item.due_date"> - {{item.parsedDate}}</small>
+            <br><small>{{item.project_name}}</small>
+            <small ng-show="hover">
+                
+                <button ng-click="remove()"style="background-color: transparent; color:red; position:relative; border:none" class="fa fa-trash-o"> Delete</button>
+            </small>
+        </li>
+    </ul>
+</td>

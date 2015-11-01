@@ -1,0 +1,27 @@
+{
+  "name": "angular-stringcontains",
+  "authors": [
+    "Enzo Vergara <vergara.enzo@gmail.com>"
+  ],
+  "description": "Angular filter for easy JSON Array filtering",
+  "main": "angular-stringcontains.js",
+  "moduleType": [],
+  "keywords": [
+    "angular",
+    "filter",
+    "json",
+    "string"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/enzosv/angular-stringcontains",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.4.7"
+  }
+}
