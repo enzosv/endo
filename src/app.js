@@ -71,20 +71,21 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						if (!commands) {
 							commands = [];
 						}
-						var now = new Date()
-							.getTime();
-						for (var i = 0; i < local.items.length; i++) {
-							if (local.items[i].due_date) {
-								var newParsedDate = parseDate(now, Date.parse(local.items[i].due_date));
-								var newFullParsedDate = $filter('date')(local.items[i].due_date, "yyyy MMMM EEEE d");
-								local.items[i].searchKey.replace(local.items[i].parsedDate, newParsedDate)
-									.replace(local.items[i].fullParsedDate, newFullParsedDate);
-								local.items[i].parseDate = newParsedDate;
-								local.items[i].fullParsedDate = newFullParsedDate;
+						if (local.items) {
+							var now = new Date()
+								.getTime();
+							for (var i = 0; i < local.items.length; i++) {
+								if (local.items[i].due_date) {
+									var newParsedDate = parseDate(now, Date.parse(local.items[i].due_date));
+									var newFullParsedDate = $filter('date')(local.items[i].due_date, "yyyy MMMM EEEE d");
+									local.items[i].searchKey.replace(local.items[i].parsedDate, newParsedDate)
+										.replace(local.items[i].fullParsedDate, newFullParsedDate);
+									local.items[i].parseDate = newParsedDate;
+									local.items[i].fullParsedDate = newFullParsedDate;
+								}
 							}
-						}
-						$scope.items = local.items;
-						if (!$scope.items) {
+							$scope.items = local.items;
+						} else {
 							$scope.items = [];
 						}
 						$scope.projects = local.projects;
