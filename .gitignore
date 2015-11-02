@@ -1,5 +1,6 @@
 src/bower_components
 ./node_modules
+*.pem
 
 # OSX
 .DS_Store

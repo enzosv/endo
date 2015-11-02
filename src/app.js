@@ -1,4 +1,5 @@
 "use strict";
+
 angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 	.controller('MainController', function ($http, $scope, $filter) {
 
@@ -10,6 +11,21 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 		var seq_g = 0;
 		$scope.projects = {};
 		$scope.last_sync = 0;
+
+		Mousetrap.bind(['ctrl+s', 'meta+s'], function (e) {
+			if (e.preventDefault) {
+				e.preventDefault();
+			}
+			document.getElementById("searchField")
+				.focus();
+			return false;
+		});
+		Mousetrap.bind('command+enter', function () {
+			if ($scope.search.length > 0) {
+				$scope.add();
+			}
+			return false;
+		});
 
 		$scope.resetAll = function () {
 			$scope.items = [];
@@ -156,18 +172,9 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 			});
 		};
 
-		var getProjectIdWithName = function (name) {
-			for (var key in $scope.projects) {
-				if ($scope.projects[key].name === name) {
-					return key;
-				}
-			}
-			return 0;
-		}
-
 		var getOrCreateProjectIdWithName = function (name) {
 			for (var key in $scope.projects) {
-				if ($scope.projects[key].name === name) {
+				if ($scope.projects[key].name.toLowerCase() === name.toLowerCase()) {
 					return key;
 				}
 			}
@@ -228,11 +235,21 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 							visible = projectClone[data.Projects[i].id].visible;
 						}
 
-						$scope.projects[data.Projects[i].id] = {
-							"name": data.Projects[i].name,
-							"visible": visible,
-							"color": projectColors[data.Projects[i].color]
-						};
+
+
+						if (data.Projects[i].name === "Inbox") {
+							$scope.projects[data.Projects[i].id] = {
+								"name": data.Projects[i].name,
+								"visible": visible,
+								"color": "#b58900"
+							};
+						} else {
+							$scope.projects[data.Projects[i].id] = {
+								"name": data.Projects[i].name,
+								"visible": visible,
+								"color": projectColors[data.Projects[i].color]
+							};
+						}
 
 					}
 					var now = new Date()
@@ -251,7 +268,7 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 							item.fullParsedDate = "";
 						}
 
-						item.searchKey = (item.parsedDate + " " + item.fullParsedDate + " " + item.content + " " + item.project_name)
+						item.searchKey = (item.parsedDate + " " + item.fullParsedDate + " " + item.content + " #" + item.project_name)
 							.toLowerCase();
 						console.log(item.searchKey);
 					}
@@ -300,7 +317,7 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 					due_date: true,
 					project_id: project_id,
 					color: $scope.projects[project_id].color,
-					searchKey: (content + " " + dateString + " " + projectName)
+					searchKey: (content + " " + dateString + " #" + projectName)
 						.toLowerCase()
 				});
 			} else {
@@ -312,7 +329,7 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 					project_name: projectName,
 					project_id: project_id,
 					color: $scope.projects[project_id].color,
-					searchKey: (content + " " + projectName)
+					searchKey: (content + " #" + projectName)
 						.toLowerCase()
 				});
 			}

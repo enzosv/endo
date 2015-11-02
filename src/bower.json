@@ -25,6 +25,7 @@
     "jquery": "~2.1.4",
     "angular-stringcontains": "*",
     "font-awesome": "~4.4.0",
-    "angular-timeago": "~0.2.4"
+    "angular-timeago": "~0.2.4",
+    "mousetrap": "~1.5.3"
   }
 }

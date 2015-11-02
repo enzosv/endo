@@ -1,0 +1,17 @@
+input[type="checkbox"] {
+  display:none;
+}
+
+input[type="checkbox"] + span:before {
+  font-family: 'FontAwesome';
+  padding-right: 3px;
+  font-size: 20px;
+}
+
+input[type="checkbox"] + span:before {
+  content: "\f10c"; /* check-empty */
+}
+
+input[type="checkbox"]:checked + span:before {
+  content: "\f111"; /* check */
+}

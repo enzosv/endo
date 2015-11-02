@@ -9,25 +9,18 @@
 
 <body ng-controller="MainController">
     <div ng-show="token" style="width:98%; margin:0 auto; margin-top:1%;">
-        <div class="pull-left">
-            Last Synced: {{last_sync | timeAgo}}
-            <a href="" ng-click="todoistGet()">Sync</a>
-            <br> For edits, visit <a href="https://todoist.com/app">Todoist</a>
-            <br> {{email}} <a href="" ng-click="resetAll()">Logout</a>
-            <br>
-            <br>
-        </div>
         <div style="width:50%; margin: 0 auto;">
-            <input type="text" style="width: calc(100% - {{search ? '64' : '0'}}px)" class="form-control pull-left" placeholder="Search" ng-model="search">
+            <input type="text" style="width: calc(100% - {{search ? '64' : '0'}}px)" class="form-control pull-left" placeholder="Search" ng-model="search" id="searchField">
             <input type="button" style="width:56px;" class="btn btn-default pull-right" value="Add" ng-click="add()" ng-show="search">
             <br>
             <br>
-            <table class="table table-bordered">
-                <th>All Tasks
+            <table class="table table-bordered" style="margin-top: 2%;">
+                <th>Todoist
                     <small ng-repeat="project in projects">
-                    <label>
-                        <input type="checkbox" ng-model="project.visible" ng-change="saveProjects()"> {{project.name}}
+                    <label style="color:{{project.color}};">
+                        <input type="checkbox" ng-model="project.visible" ng-change="saveProjects()" value="project.name"><span></span>
                     </label>
+                    {{project.name}}
                 </small>
                 </th>
                 <tbody>
@@ -36,6 +29,12 @@
                 </tbody>
             </table>
         </div>
+        <center>
+            Last Synced: {{last_sync | timeAgo}}
+            <a href="" ng-click="todoistGet()">Sync</a>
+            <br> {{email}} <a href="" ng-click="resetAll()">Logout</a>
+            <br> For edits, visit <a href="https://todoist.com/app">Todoist</a>
+        </center>
     </div>
     <form ng-hide="token" class="form-horizontal" ng-submit="login()" style="margin-top:10%; width:30%; margin:0 auto">
         <h3><center>A <a href="https://todoist.com/app">Todoist</a> new tab page</center></h3>
@@ -58,4 +57,5 @@
     </form>
 </body>
 <script src="scripts/combined.js"></script>
+
 </html>

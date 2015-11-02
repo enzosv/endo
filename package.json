@@ -10,10 +10,15 @@
   "license": "ISC",
   "devDependencies": {
     "gulp": "^3.9.0",
+    "gulp-crx-pkg": "^0.1.2",
+    "gulp-htmlmin": "^1.2.0",
     "gulp-if": "^2.0.0",
     "gulp-minify-css": "^1.2.1",
     "gulp-ng-annotate": "^1.1.0",
+    "gulp-shell": "^0.5.1",
     "gulp-uglify": "^1.4.2",
-    "gulp-useref": "^2.0.0"
+    "gulp-uncss": "^1.0.4",
+    "gulp-useref": "^2.0.0",
+    "html-minifier": "^1.0.0"
   }
 }
