@@ -27,7 +27,7 @@ gulp.task('minify', function () {
         .pipe(gulp.dest(packageName));
 });
 
-gulp.task('clean', function () {
+gulp.task('clean-folder', function () {
     return gulp.src(packageName, {
             read: false
         })
@@ -56,6 +56,11 @@ gulp.task('pack', shell.task([
 ]));
 
 gulp.task('default', function (callback) {
-    runSequence(['clean', 'clean-crx'], ['copy-manifest', 'copy-font'], 'minify', 'pack',
+    runSequence('minify', 'pack',
+        callback);
+});
+
+gulp.task('recreate', function(callback){
+    runSequence(['clean-folder', 'clean-crx'], ['copy-manifest', 'copy-font'], 'minify', 'pack',
         callback);
 });

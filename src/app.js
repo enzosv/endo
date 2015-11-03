@@ -11,8 +11,9 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 		var seq_g = 0;
 		$scope.projects = {};
 		$scope.last_sync = 0;
+		var scheduledUpdate = false;
 
-		Mousetrap.bind(['ctrl+s', 'meta+s'], function (e) {
+		Mousetrap.bind(['option+s'], function (e) {
 			if (e.preventDefault) {
 				e.preventDefault();
 			}
@@ -20,12 +21,25 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 				.focus();
 			return false;
 		});
-		Mousetrap.bind('command+enter', function () {
+		Mousetrap.bind(['option+enter'], function (e) {
+			if (e.preventDefault) {
+				e.preventDefault();
+			}
 			if ($scope.search.length > 0) {
+				console.log("adding");
 				$scope.add();
 			}
 			return false;
 		});
+
+		document.getElementById("searchField")
+			.addEventListener("focus", function () {
+				this.placeholder = "Taskname tomorrow 5pm #Projectname";
+			});
+		document.getElementById("searchField")
+			.addEventListener("blur", function () {
+				this.placeholder = "Search [alt-s]";
+			});
 
 		$scope.resetAll = function () {
 			$scope.items = [];
@@ -113,7 +127,7 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 							$scope.last_sync = 0;
 						}
 						if ($scope.last_sync === 0 || $scope.last_sync < new Date()
-							.getTime() - 600000) {
+							.getTime() - 300000) {
 							console.log("last synced: " + $filter('timeAgo')($scope.last_sync) + ". Performing sync");
 							$scope.todoistGet();
 						} else {
@@ -234,8 +248,6 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						} else {
 							visible = projectClone[data.Projects[i].id].visible;
 						}
-
-
 
 						if (data.Projects[i].name === "Inbox") {
 							$scope.projects[data.Projects[i].id] = {
@@ -412,60 +424,69 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 			}
 		};
 
+		function performUpdate() {
+			$http({
+					method: "GET",
+					url: "https://todoist.com/API/v6/sync",
+					params: {
+						token: $scope.token,
+						commands: JSON.stringify(commands)
+					}
+				})
+				.success(function (data) {
+					scheduledUpdate = false;
+					// for (var key in data.TempIdMapping) {
+					// 	for (var i = $scope.items.length - 1; i >= 0; i--) {
+					// 		if ($scope.items[i].id === key) {
+					// 			$scope.items[i].id = data.TempIdMapping[key];
+					// 		}
+					// if ($scope.items[i].project_id === key) {
+					// 	$scope.items[i].project_id = data.TempIdMapping[key];
+					// }
+					// }
+					// for (var proj in $scope.projects) {
+					// 	if (proj === key) {
+					// 		$scope.projects[key] = {
+					// 			name: $scope.projects[proj].name,
+					// 			visible: $scope.projects[proj].visible,
+					// 			color: $scope.projects[proj].color
+					// 		};
+					// 		delete $scope.projects[proj];
+					// 	}
+					// }
+					// }
+
+					console.log(data);
+					commands = [];
+					// seq = data.seq_no;
+					// seq_g = data.seq_no_global;
+					seq = 0;
+					seq_g = 0;
+					chrome.storage.local.set({
+						'commands': commands,
+						'items': $scope.items
+							// 'projects': $scope.projects
+					});
+					$scope.todoistGet();
+					console.log("update success");
+				})
+				.error(function (error) {
+					scheduledUpdate = false;
+					console.error("update error: ");
+					console.error(error);
+				});
+		}
+
 		$scope.todoistUpdate = function () {
 			if (!seq) {
 				$scope.todoistGet();
 			}
 			if (commands.length > 0) {
 				console.log(JSON.stringify(commands));
-				$http({
-						method: "GET",
-						url: "https://todoist.com/API/v6/sync",
-						params: {
-							token: $scope.token,
-							commands: JSON.stringify(commands)
-						}
-					})
-					.success(function (data) {
-						// for (var key in data.TempIdMapping) {
-						// 	for (var i = $scope.items.length - 1; i >= 0; i--) {
-						// 		if ($scope.items[i].id === key) {
-						// 			$scope.items[i].id = data.TempIdMapping[key];
-						// 		}
-						// if ($scope.items[i].project_id === key) {
-						// 	$scope.items[i].project_id = data.TempIdMapping[key];
-						// }
-						// }
-						// for (var proj in $scope.projects) {
-						// 	if (proj === key) {
-						// 		$scope.projects[key] = {
-						// 			name: $scope.projects[proj].name,
-						// 			visible: $scope.projects[proj].visible,
-						// 			color: $scope.projects[proj].color
-						// 		};
-						// 		delete $scope.projects[proj];
-						// 	}
-						// }
-						// }
-
-						console.log(data);
-						commands = [];
-						// seq = data.seq_no;
-						// seq_g = data.seq_no_global;
-						seq = 0;
-						seq_g = 0;
-						chrome.storage.local.set({
-							'commands': commands,
-							'items': $scope.items
-								// 'projects': $scope.projects
-						});
-						$scope.todoistGet();
-						console.log("update success");
-					})
-					.error(function (error) {
-						console.error("update error: ");
-						console.error(error);
-					});
+				if (!scheduledUpdate) {
+					setTimeout(performUpdate(), 30000);
+					scheduledUpdate = true;
+				}
 			}
 		};
 

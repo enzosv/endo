@@ -3,7 +3,6 @@
         <li>
             <small ng-show="hover" class="pull-right">
                 <button ng-click="remove()"style="background-color: transparent; color:red; position:relative; border:none" class="fa fa-trash-o"> Delete</button>
-                <a href="https://todoist.com/app">Edit</a>
             </small>
             <button ng-click="complete()" style="background-color: transparent; color:{{item.color}}; padding-top:8px; border:none; height:32px; width:32px" class="fa fa-square-o fa-2x pull-left" ng-hide="item.completed"></button>
             <button ng-click="uncomplete()" style="background-color: transparent; color:{{item.color}}; padding-top:8px; border:none; height:32px; width:32px" class="fa fa-check-square-o fa-2x pull-left" ng-show="item.completed"></button>
