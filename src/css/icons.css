@@ -1,0 +1,48 @@
+@font-face {
+    font-family: 'endo';
+    src: url('./fonts/endo.woff?88669874') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+input[type="checkbox"] {
+    display: none;
+}
+
+input[type="checkbox"] + span:before {
+    font-family: 'endo';
+    padding-right: 3px;
+    font-size: 18px;
+}
+
+input[type="checkbox"] + span:before {
+    content: '\e802';
+}
+
+input[type="checkbox"]:checked + span:before {
+    content: '\e803';
+}
+
+button[type="icon"] + span:before{
+	font-family: 'endo';
+	padding-right: 3px;
+	font-size: 20px;
+	content: '\e800';
+}
+
+.icon-check:before {
+	font-family: 'endo';
+	font-size: 26px;
+    content: '\e800';
+}
+
+.icon-check-empty:before {
+	font-family: 'endo';
+	font-size: 26px;
+    content: '\e801';
+}
+
+.icon-trash-empty:before {
+	font-family: 'endo';
+    content: '\e804';
+}

@@ -5,9 +5,9 @@
         Endo
     </title>
     <!-- build:css combined.min.css -->
-    <link rel="stylesheet" type="text/css" href="bootstrap-solarized-light.css">
-    <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css">
-    <link rel="stylesheet" type="text/css" href="checkbox.css">
+    <link rel="stylesheet" type="text/css" href="./css/bootstrap-solarized-light.css">
+    <!-- <link rel="stylesheet" type="text/css" href="bootstrap.css"> -->
+    <link rel="stylesheet" type="text/css" href="./css/icons.css">
     <!-- endbuild -->
     <!-- build:js combined.min.js -->
     <script type="text/javascript" src="bower_components/angular/angular.js"></script>
@@ -20,14 +20,14 @@
     <!-- endbuild -->
 </head>
 
-<body ng-controller="MainController">
+<body ng-controller="MainController" bgcolor="#FDF6E3">
     <div ng-show="token" style="width:98%; margin:0 auto; margin-top:1%;">
         <div style="width:50%; margin: 0 auto;">
             <input type="text" style="width: calc(100% - {{search ? '64' : '0'}}px)" class="form-control pull-left mousetrap" placeholder="Search" ng-model="search" id="searchField">
             <input type="button" style="width:56px;" class="btn btn-default pull-right" value="Add" ng-click="add()" ng-show="search">
             <br><small ng-hide="search" class="pull-right">[alt-s]</small><small ng-show="search" class="pull-right">[alt-enter]</small>
             <br>
-            <table class="table table-bordered" style="margin-top: 2%;">
+            <table class="table table-bordered table-hover" style="margin-top: 2%;">
                 <th>Todoist
                     <small ng-repeat="project in projects">
                     <label style="color:{{project.color}};">

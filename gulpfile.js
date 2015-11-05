@@ -8,30 +8,38 @@ var gulp = require('gulp'),
     uncss = require('gulp-uncss'),
     shell = require('gulp-shell'),
     runSequence = require('run-sequence'),
-    clean = require('gulp-clean');
+    del = require('del'),
+    htmlmin = require('gulp-htmlmin');
 
 var packageName = 'endo';
 
-gulp.task('minify', function () {
+gulp.task('minify-assets', function () {
     var assets = useref.assets();
     return gulp.src('src/*.html')
         .pipe(assets)
         .pipe(gulpif('*.js', ngAnnotate()))
         .pipe(gulpif('*.js', uglify()))
-        .pipe(gulpif('*.css', uncss({
-            html: ['src/*.html']
-        })))
+        // .pipe(gulpif('*.css', uncss({
+        //     html: ["src/*.html"]
+        // })))
         .pipe(gulpif('*.css', csso()))
         .pipe(assets.restore())
         .pipe(useref())
         .pipe(gulp.dest(packageName));
 });
 
+gulp.task('minify-html', function () {
+    return gulp.src(packageName + '/*.html')
+        .pipe(htmlmin({
+            collapseWhitespace: true
+        }))
+        .pipe(gulp.dest(packageName));
+});
+
 gulp.task('clean-folder', function () {
-    return gulp.src(packageName, {
-            read: false
-        })
-        .pipe(clean());
+    return del([
+        packageName
+    ]);
 });
 
 gulp.task('copy-manifest', function () {
@@ -40,15 +48,14 @@ gulp.task('copy-manifest', function () {
 });
 
 gulp.task('copy-font', function () {
-    return gulp.src('src/bower_components/font-awesome/fonts/fontawesome-webfont.woff2')
-        .pipe(gulp.dest(packageName+'/fonts'));
+    return gulp.src('src/fonts/*')
+        .pipe(gulp.dest(packageName + '/fonts'));
 });
 
 gulp.task('clean-crx', function () {
-    return gulp.src(packageName+'.crx', {
-            read: false
-        })
-        .pipe(clean());
+    return del([
+        packageName + '.crx'
+    ]);
 });
 
 gulp.task('pack', shell.task([
@@ -56,11 +63,11 @@ gulp.task('pack', shell.task([
 ]));
 
 gulp.task('default', function (callback) {
-    runSequence('minify', 'pack',
+    runSequence('minify-assets', 'pack',
         callback);
 });
 
-gulp.task('recreate', function(callback){
-    runSequence(['clean-folder', 'clean-crx'], ['copy-manifest', 'copy-font'], 'minify', 'pack',
+gulp.task('recreate', function (callback) {
+    runSequence(['clean-folder', 'clean-crx'], ['minify-assets', 'copy-manifest', 'copy-font'], 'pack',
         callback);
 });
