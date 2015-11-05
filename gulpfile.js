@@ -9,7 +9,8 @@ var gulp = require('gulp'),
     shell = require('gulp-shell'),
     runSequence = require('run-sequence'),
     del = require('del'),
-    htmlmin = require('gulp-htmlmin');
+    htmlmin = require('gulp-htmlmin'),
+    purify = require('gulp-purifycss');
 
 var packageName = 'endo';
 
@@ -19,9 +20,13 @@ gulp.task('minify-assets', function () {
         .pipe(assets)
         .pipe(gulpif('*.js', ngAnnotate()))
         .pipe(gulpif('*.js', uglify()))
-        // .pipe(gulpif('*.css', uncss({
-        //     html: ["src/*.html"]
-        // })))
+        .pipe(gulpif('*.css', uncss({
+            ignore: [
+                /\.table/
+            ],
+            html: ["src/*.html"]
+        })))
+        // .pipe(gulpif('*.css', purify(['src/*.html'])))
         .pipe(gulpif('*.css', csso()))
         .pipe(assets.restore())
         .pipe(useref())
@@ -44,6 +49,7 @@ gulp.task('clean-folder', function () {
 
 gulp.task('copy-manifest', function () {
     return gulp.src('src/manifest.json')
+        // .pipe(uglify())
         .pipe(gulp.dest(packageName));
 });
 
