@@ -38,7 +38,7 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 			});
 		document.getElementById("searchField")
 			.addEventListener("blur", function () {
-				this.placeholder = "Search [alt-s]";
+				this.placeholder = "Search";
 			});
 
 		$scope.resetAll = function () {
@@ -484,7 +484,7 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 			if (commands.length > 0) {
 				console.log(JSON.stringify(commands));
 				if (!scheduledUpdate) {
-					setTimeout(performUpdate(), 30000);
+					setTimeout(performUpdate(), 60000);
 					scheduledUpdate = true;
 				}
 			}

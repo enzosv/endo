@@ -4,7 +4,7 @@ var gulp = require('gulp'),
     gulpif = require('gulp-if'),
     ngAnnotate = require('gulp-ng-annotate'),
     uglify = require('gulp-uglify'),
-    minifyCss = require('gulp-minify-css'),
+    csso = require('gulp-csso'),
     uncss = require('gulp-uncss'),
     shell = require('gulp-shell'),
     runSequence = require('run-sequence'),
@@ -21,7 +21,7 @@ gulp.task('minify', function () {
         .pipe(gulpif('*.css', uncss({
             html: ['src/*.html']
         })))
-        .pipe(gulpif('*.css', minifyCss()))
+        .pipe(gulpif('*.css', csso()))
         .pipe(assets.restore())
         .pipe(useref())
         .pipe(gulp.dest(packageName));
