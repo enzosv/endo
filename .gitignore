@@ -2,6 +2,9 @@ src/bower_components
 ./node_modules
 *.pem
 ./endo
+/endo/
+/endo
+./endo/
 
 # OSX
 .DS_Store
