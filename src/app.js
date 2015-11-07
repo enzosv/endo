@@ -136,15 +136,14 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 							$scope.last_sync = 0;
 						}
 						// if (local.calendars) {
-							// $scope.calendars = local.calendars;
-							if (local.events) {
-								console.log(local.events);
-								$scope.events = local.events;
-							} else{
-								refreshCalendar();
-							}
+						// $scope.calendars = local.calendars;
+						if (local.events) {
+							$scope.events = local.events;
+						} else {
+							refreshCalendar();
+						}
 						// } else{
-							// refreshCalendar();
+						// refreshCalendar();
 						// }
 
 						$scope.$apply();
@@ -177,30 +176,22 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						'Content-Type': 'application/json'
 					}
 				};
-				// $http.get("https://www.googleapis.com/calendar/v3/colors", googleRequestOptions)
-					// .then(function (colorResponse) {
-						// $scope.googleColors = colorResponse.data;
-						$http.get("https://www.googleapis.com/calendar/v3/users/me/calendarList", googleRequestOptions)
-							.then(function (response) {
-								$scope.calendars = [];
-								$scope.events = [];
-								var calendars = response.data.items;
-								var startTime = new Date()
-									.toISOString();
-								var endTime = new Date();
-								endTime.setDate(endTime.getDate() + 14);
-								endTime = endTime.toISOString();
-								calendarCount = calendars.length;
-								for (var i = 0; i < calendars.length; i++) {
-									// calendars[i].color = colorResponse.data.calendar[calendars[i].colorId].background;
-									getEventsForId(calendars[i].id, calendars[i].backgroundColor, startTime, endTime);
-								}
-							}, function (error) {
-								console.error(error);
-							});
-					// }, function (error) {
-						// console.error(error);
-					// });
+				$http.get("https://www.googleapis.com/calendar/v3/users/me/calendarList", googleRequestOptions)
+					.then(function (response) {
+						
+						var calendars = response.data.items;
+						var startTime = new Date()
+							.toISOString();
+						var endTime = new Date();
+						endTime.setDate(endTime.getDate() + 14);
+						endTime = endTime.toISOString();
+						calendarCount = calendars.length;
+						for (var i = 0; i < calendars.length; i++) {
+							getEventsForId(calendars[i].id, calendars[i].backgroundColor, startTime, endTime);
+						}
+					}, function (error) {
+						console.error(error);
+					});
 			});
 		}
 
@@ -208,9 +199,7 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 		function getEventsForId(id, color, startTime, endTime) {
 			$http.get("https://www.googleapis.com/calendar/v3/calendars/" + id + "/events?timeMin=" + startTime + "&timeMax=" + endTime + "&singleEvents=true&orderBy=startTime&maxAtendees=0", googleRequestOptions)
 				.then(function (response) {
-					// console.log(response.data);
 					if (response.data.items.length > 0) {
-						console.log(response.data);
 						for (var i = 0; i < response.data.items.length; i++) {
 							var item = response.data.items[i];
 							item.color = color;
@@ -235,21 +224,24 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 					}
 					calendarsLoaded++;
 					if (calendarsLoaded === calendarCount) {
-						$scope.calendars = tempCalendars;
-						$scope.events = tempEvents;
-						chrome.storage.local.set({
-							'events': $scope.events,
-						});
+						if ($scope.events !== tempEvents) {
+							$scope.calendars = tempCalendars;
+							$scope.events = tempEvents;
+							chrome.storage.local.set({
+								'events': $scope.events,
+							});
+						}
 					}
 				}, function (error) {
 					calendarsLoaded++;
 					if (calendarsLoaded === calendarCount) {
-						$scope.calendars = tempCalendars;
-						$scope.events = tempEvents;
-						chrome.storage.local.set({
-							// 'calendars': $scope.calendars,
-							'events': $scope.events,
-						});
+						if ($scope.events !== tempEvents) {
+							$scope.calendars = tempCalendars;
+							$scope.events = tempEvents;
+							chrome.storage.local.set({
+								'events': $scope.events,
+							});
+						}
 					}
 					console.error(error);
 				});
@@ -632,10 +624,6 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 	.directive("event", function () {
 		return {
 			templateUrl: "event.html",
-			controller: function ($scope) {
-				console.log($scope.event);
-				// $scope.event.color = $scope.$parent.googleColors.calendar[$scope.event.colorId].foreground;
-				// console.log($scope.event);
-			}
+			controller: function ($scope) {}
 		}
 	});

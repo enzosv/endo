@@ -63,7 +63,7 @@
             </div>
         </div>
     </div>
-    <center>
+    <center ng-show="token">
         Last Synced: {{last_sync | timeAgo}}
         <a href="" ng-click="todoistGet()">Sync</a>
         <br> {{email}} <a href="" ng-click="resetAll()">Logout</a>

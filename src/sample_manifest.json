@@ -1,0 +1,22 @@
+{
+	"name": "Endo",
+	"description": "Todoist new tab page with calendar and offline capability",
+	"version": "0.0.0.4",
+	"manifest_version": 2,
+	"chrome_url_overrides": {
+		"newtab": "newtab.html"
+	},
+	"permissions": [
+		"https://todoist.com/API/v6/",
+		"storage",
+		"identity",
+		"https://www.googleapis.com/calendar/v3"
+	],
+	"oauth2": {
+		"client_id":"<CLIENT_ID>.apps.googleusercontent.com",
+		"scopes": [
+			"https://www.googleapis.com/auth/calendar.readonly"
+		]
+	},
+	"key":"<APPLICATION_KEY>"
+}

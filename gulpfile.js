@@ -11,7 +11,9 @@ var gulp = require('gulp'),
     del = require('del'),
     htmlmin = require('gulp-htmlmin'),
     // purify = require('gulp-purifycss'),
-    zip = require('gulp-zip');
+    zip = require('gulp-zip'),
+    replace = require('gulp-replace'),
+    rename = require("gulp-rename");
 
 var packageName = 'endo';
 
@@ -71,11 +73,18 @@ gulp.task('clean-zip', function () {
     ]);
 });
 
-
 gulp.task('zip', function () {
     return gulp.src(packageName+'/*')
         .pipe(zip(packageName + '.zip'))
         .pipe(gulp.dest(''));
+});
+
+gulp.task('replace-manifest', function(){
+  gulp.src(['src/manifest.json'])
+    .pipe(replace(/"key": ".*"/g, '"key":"<APPLICATION_KEY>"'))
+    .pipe(replace(/"client_id": ".*"/g, '"client_id":"<CLIENT_ID>.apps.googleusercontent.com"'))
+    .pipe(rename("src/sample_manifest.json"))
+    .pipe(gulp.dest(''));
 });
 
 gulp.task('pack', shell.task([
@@ -83,11 +92,11 @@ gulp.task('pack', shell.task([
 ]));
 
 gulp.task('default', function (callback) {
-    runSequence('minify-assets', ['pack', 'zip'],
+    runSequence('minify-assets', ['pack', 'zip', 'replace-manifest'],
         callback);
 });
 
 gulp.task('recreate', function (callback) {
-    runSequence(['clean-folder', 'clean-crx', 'clean-zip'], ['minify-assets', 'copy-manifest', 'copy-font'], ['pack', 'zip'],
+    runSequence(['clean-folder', 'clean-crx', 'clean-zip'], ['minify-assets', 'copy-manifest', 'copy-font'], ['pack', 'zip', 'replace-manifest'],
         callback);
 });
