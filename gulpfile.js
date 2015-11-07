@@ -10,7 +10,8 @@ var gulp = require('gulp'),
     runSequence = require('run-sequence'),
     del = require('del'),
     htmlmin = require('gulp-htmlmin'),
-    purify = require('gulp-purifycss');
+    // purify = require('gulp-purifycss'),
+    zip = require('gulp-zip');
 
 var packageName = 'endo';
 
@@ -54,7 +55,7 @@ gulp.task('copy-manifest', function () {
 });
 
 gulp.task('copy-font', function () {
-    return gulp.src('src/fonts/*')
+    return gulp.src('src/css/fonts/*')
         .pipe(gulp.dest(packageName + '/fonts'));
 });
 
@@ -64,16 +65,29 @@ gulp.task('clean-crx', function () {
     ]);
 });
 
+gulp.task('clean-zip', function () {
+    return del([
+        packageName + '.zip'
+    ]);
+});
+
+
+gulp.task('zip', function () {
+    return gulp.src(packageName+'/*')
+        .pipe(zip(packageName + '.zip'))
+        .pipe(gulp.dest(''));
+});
+
 gulp.task('pack', shell.task([
     '\/Applications\/Google\\ Chrome.app\/Contents\/MacOS\/Google\\ Chrome --pack-extension=\/Users\/Enzo\/Dev\/Web\/endo\/endo\/ --pack-extension-key=\/Users\/Enzo\/Dev\/Web\/endo\/endo.pem'
 ]));
 
 gulp.task('default', function (callback) {
-    runSequence('minify-assets', 'pack',
+    runSequence('minify-assets', ['pack', 'zip'],
         callback);
 });
 
 gulp.task('recreate', function (callback) {
-    runSequence(['clean-folder', 'clean-crx'], ['minify-assets', 'copy-manifest', 'copy-font'], 'pack',
+    runSequence(['clean-folder', 'clean-crx', 'clean-zip'], ['minify-assets', 'copy-manifest', 'copy-font'], ['pack', 'zip'],
         callback);
 });

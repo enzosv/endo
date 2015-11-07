@@ -5,6 +5,10 @@ src/bower_components
 /endo/
 /endo
 ./endo/
+./endo.zip
+endo.zip
+src/manifest.json
+endo/manifest.json
 
 # OSX
 .DS_Store

@@ -1,7 +1,51 @@
 "use strict";
-
 angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 	.controller('MainController', function ($http, $scope, $filter) {
+
+		var isTimeless = function (date) {
+			date = new Date(date);
+			if ((date.getHours() === 0 && date.getMinutes() === 0) || (date.getHours() === 23 && date.getMinutes() === 59)) {
+				return true;
+			}
+
+			return false;
+		};
+
+		var now = new Date()
+			.getTime();
+		var parseDate = function (date) {
+			var parsedDate = new Date(date)
+				.getTime();
+			if (parsedDate > now) {
+				var format;
+				if (parsedDate < now + 86400000) {
+					if (isTimeless(parsedDate)) {
+						format = "'Today'";
+					} else {
+						format = "h:mm a";
+					}
+				} else if (parsedDate < now + 172800000) {
+					if (isTimeless(parsedDate)) {
+						format = "'Tomorrow'";
+					} else {
+						format = "'Tomorrow' h:mm a";
+					}
+				} else if (parsedDate < now + 604800000) {
+					format = "EEE, MMM d";
+				} else if (parsedDate < now + 2592000000) {
+					format = "MMM d";
+				} else {
+					format = "MMM yyyy";
+				}
+				return $filter('date')(parsedDate, format);
+			} else {
+				return $filter('timeAgo')(date);
+			}
+		};
+
+		$scope.calendars = [];
+		$scope.events = [];
+		var googleRequestOptions;
 
 		$scope.token = true;
 		$scope.items = [];
@@ -12,6 +56,10 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 		$scope.projects = {};
 		$scope.last_sync = 0;
 		var scheduledUpdate = false;
+		var calendarCount = 0;
+		var calendarsLoaded = 0;
+		var tempEvents = [];
+		var tempCalendars = [];
 
 		Mousetrap.bind(['option+s'], function (e) {
 			if (e.preventDefault) {
@@ -52,61 +100,22 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 			chrome.storage.local.clear();
 		};
 
-		var isTimeless = function (date) {
-			date = new Date(date);
-			if ((date.getHours() === 0 && date.getMinutes() === 0) || (date.getHours() === 23 && date.getMinutes() === 59)) {
-				return true;
-			}
-
-			return false;
-		};
-		var parseDate = function (now, date) {
-			var parsedDate = new Date(date)
-				.getTime();
-			if (parsedDate > now) {
-				var format;
-				if (parsedDate < now + 86400000) {
-					if (isTimeless(parsedDate)) {
-						format = "'Today'";
-					} else {
-						format = "h:mm a";
-					}
-				} else if (parsedDate < now + 172800000) {
-					if (isTimeless(parsedDate)) {
-						format = "'Tomorrow'";
-					} else {
-						format = "'Tomorrow' h:mm a";
-					}
-				} else if (parsedDate < now + 604800000) {
-					format = "EEE, MMM d";
-				} else if (parsedDate < now + 2592000000) {
-					format = "MMM d";
-				} else {
-					format = "MMM yyyy";
-				}
-				return $filter('date')(parsedDate, format);
-			} else {
-				return $filter('timeAgo')(date);
-			}
-		};
-
 		chrome.storage.sync.get(['token', 'email'], function (sync) {
 			console.log("refresh");
 			if (sync) {
 				$scope.token = sync.token;
 				$scope.email = sync.email;
-				chrome.storage.local.get(['commands', 'items', 'projects', 'last_sync'], function (local) {
+				chrome.storage.local.get(['commands', 'items', 'projects', 'last_sync', 'calendars', 'events'], function (local) {
 					if (local) {
 						commands = local.commands;
 						if (!commands) {
 							commands = [];
 						}
 						if (local.items) {
-							var now = new Date()
-								.getTime();
+
 							for (var i = 0; i < local.items.length; i++) {
 								if (local.items[i].due_date) {
-									var newParsedDate = parseDate(now, Date.parse(local.items[i].due_date));
+									var newParsedDate = parseDate(Date.parse(local.items[i].due_date));
 									var newFullParsedDate = $filter('date')(local.items[i].due_date, "yyyy MMMM EEEE d");
 									local.items[i].searchKey.replace(local.items[i].parsedDate, newParsedDate)
 										.replace(local.items[i].fullParsedDate, newFullParsedDate);
@@ -126,13 +135,29 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						if (!$scope.last_sync) {
 							$scope.last_sync = 0;
 						}
+						// if (local.calendars) {
+							// $scope.calendars = local.calendars;
+							if (local.events) {
+								console.log(local.events);
+								$scope.events = local.events;
+							} else{
+								refreshCalendar();
+							}
+						// } else{
+							// refreshCalendar();
+						// }
+
+						$scope.$apply();
 						if ($scope.last_sync === 0 || $scope.last_sync < new Date()
 							.getTime() - 300000) {
 							console.log("last synced: " + $filter('timeAgo')($scope.last_sync) + ". Performing sync");
 							$scope.todoistGet();
-						} else {
-							$scope.$apply();
+							refreshCalendar();
 						}
+						// else {
+						// 	$scope.$apply();
+						// }
+
 					} else {
 						$scope.resetAll();
 					}
@@ -141,6 +166,94 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 				$scope.resetAll();
 			}
 		});
+
+		function refreshCalendar() {
+			chrome.identity.getAuthToken({
+				'interactive': true
+			}, function (token) {
+				googleRequestOptions = {
+					headers: {
+						'Authorization': 'OAuth ' + token,
+						'Content-Type': 'application/json'
+					}
+				};
+				// $http.get("https://www.googleapis.com/calendar/v3/colors", googleRequestOptions)
+					// .then(function (colorResponse) {
+						// $scope.googleColors = colorResponse.data;
+						$http.get("https://www.googleapis.com/calendar/v3/users/me/calendarList", googleRequestOptions)
+							.then(function (response) {
+								$scope.calendars = [];
+								$scope.events = [];
+								var calendars = response.data.items;
+								var startTime = new Date()
+									.toISOString();
+								var endTime = new Date();
+								endTime.setDate(endTime.getDate() + 14);
+								endTime = endTime.toISOString();
+								calendarCount = calendars.length;
+								for (var i = 0; i < calendars.length; i++) {
+									// calendars[i].color = colorResponse.data.calendar[calendars[i].colorId].background;
+									getEventsForId(calendars[i].id, calendars[i].backgroundColor, startTime, endTime);
+								}
+							}, function (error) {
+								console.error(error);
+							});
+					// }, function (error) {
+						// console.error(error);
+					// });
+			});
+		}
+
+
+		function getEventsForId(id, color, startTime, endTime) {
+			$http.get("https://www.googleapis.com/calendar/v3/calendars/" + id + "/events?timeMin=" + startTime + "&timeMax=" + endTime + "&singleEvents=true&orderBy=startTime&maxAtendees=0", googleRequestOptions)
+				.then(function (response) {
+					// console.log(response.data);
+					if (response.data.items.length > 0) {
+						console.log(response.data);
+						for (var i = 0; i < response.data.items.length; i++) {
+							var item = response.data.items[i];
+							item.color = color;
+							var epochTime;
+							if (item.start.date) {
+								epochTime = Date.parse(item.start.date);
+								item.epochTime = epochTime;
+								item.parsedStart = parseDate(epochTime);
+							} else {
+								epochTime = Date.parse(item.start.dateTime);
+								item.epochTime = epochTime;
+								item.parsedStart = parseDate(epochTime);
+							}
+							item.fullParsedDate = $filter('date')(epochTime, 'yyyy MMMM EEEE d');
+							item.searchKey = (item.parsedStart + " " + item.fullParsedDate + " " + item.summary + " " + response.data.summary)
+								.toLowerCase();
+
+						}
+						response.data.color = color;
+						tempCalendars.push(response.data);
+						tempEvents = tempEvents.concat(response.data.items);
+					}
+					calendarsLoaded++;
+					if (calendarsLoaded === calendarCount) {
+						$scope.calendars = tempCalendars;
+						$scope.events = tempEvents;
+						chrome.storage.local.set({
+							'events': $scope.events,
+						});
+					}
+				}, function (error) {
+					calendarsLoaded++;
+					if (calendarsLoaded === calendarCount) {
+						$scope.calendars = tempCalendars;
+						$scope.events = tempEvents;
+						chrome.storage.local.set({
+							// 'calendars': $scope.calendars,
+							'events': $scope.events,
+						});
+					}
+					console.error(error);
+				});
+		}
 
 		$scope.login = function () {
 			$scope.resetAll();
@@ -160,6 +273,7 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						'token': $scope.token,
 						'email': $scope.email
 					});
+					refreshCalendar();
 				}, function (error) {
 					var nil;
 					// $scope.email = nil;
@@ -264,8 +378,6 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						}
 
 					}
-					var now = new Date()
-						.getTime();
 					$scope.last_sync = now;
 
 					for (var j = 0; j < data.Items.length; j++) {
@@ -273,7 +385,7 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						item.project_name = $scope.projects[item.project_id].name;
 						item.color = $scope.projects[item.project_id].color;
 						if (item.due_date) {
-							item.parsedDate = parseDate(now, Date.parse(item.due_date));
+							item.parsedDate = parseDate(Date.parse(item.due_date));
 							item.fullParsedDate = $filter('date')(Date.parse(item.due_date), 'yyyy MMMM EEEE d');
 						} else {
 							item.parsedDate = "";
@@ -282,7 +394,6 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 
 						item.searchKey = (item.parsedDate + " " + item.fullParsedDate + " " + item.content + " #" + item.project_name)
 							.toLowerCase();
-						console.log(item.searchKey);
 					}
 					// if (!seq && !seq_g) {
 					$scope.items = data.Items;
@@ -515,6 +626,16 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 				$scope.mouseleave = function () {
 					$scope.hover = false;
 				};
+			}
+		}
+	})
+	.directive("event", function () {
+		return {
+			templateUrl: "event.html",
+			controller: function ($scope) {
+				console.log($scope.event);
+				// $scope.event.color = $scope.$parent.googleColors.calendar[$scope.event.colorId].foreground;
+				// console.log($scope.event);
 			}
 		}
 	});
