@@ -127,7 +127,7 @@ angular.module('endo')
 								$scope.loginError = "Invalid email/password combination. Please try again";
 								break;
 							default:
-								$scope.loginError = "Error: " + error.status + " occured. Please try again";
+								$scope.loginError = "Error " + error.status + " occured. Please try again";
 							}
 							console.error("login error:");
 							console.error(error);
@@ -235,7 +235,6 @@ angular.module('endo')
 							});
 
 							update();
-							console.log("get success");
 						}, function (error) {
 							console.error("Todoist get error: " + error);
 						});

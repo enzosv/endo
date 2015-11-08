@@ -3,7 +3,7 @@ angular.module('endo')
 		return {
 			templateUrl: "../html/event.html",
 			controller: function ($scope) {
-
+				// console.log($scope.event);
 			}
 		}
 	});

@@ -1,7 +1,6 @@
 "use strict";
 angular.module('endo')
 	.controller('MainController', function ($scope) {
-		console.log("loaded controller");
 		$scope.loggedIn = true;
 
 		$scope.sync = function () {

@@ -45,7 +45,7 @@ angular.module('endo')
 							} else {
 								$scope.calendars = local.calendars;
 								for (var i = 0; i < local.calendars.length; i++) {
-									processEvents(local.calendars[i].items, local.calendars[i].color, local.calendars[i].summary);
+									processEvents(local.calendars[i].items, local.calendars[i].color, local.calendars[i].summary, local.calendars[i].visible);
 									$scope.events = $scope.events.concat(local.calendars[i].items);
 								}
 								$scope.$apply();
@@ -93,7 +93,6 @@ angular.module('endo')
 								tempCalendars = [];
 								for (var i = 0; i < calendars.length; i++) {
 									getEventsForId(calendars[i].id, calendars[i].backgroundColor, startTime, endTime);
-
 								}
 							}, function (error) {
 								console.error(error);
@@ -101,7 +100,35 @@ angular.module('endo')
 					});
 				}
 
-				function processEvents(items, color, summary) {
+				function getEventsForId(id, color, startTime, endTime) {
+					Calendar.listEvents(googleRequestOptions, id, startTime, endTime)
+						.then(function (response) {
+							if (response.data.items.length > 0) {
+								response.data.color = color;
+								var matchedOld = false;
+								for (var i = 0; i < $scope.calendars.length; i++) {
+									if($scope.calendars[i].id === id){
+										response.data.visible = $scope.calendars[i].visible;
+										matchedOld = true;
+										break;
+									}
+								}
+								if(!matchedOld){
+									response.data.visible = true;
+								}
+								response.data.id = id;
+								processEvents(response.data.items, color, response.data.summary, response.data.visible);
+								tempCalendars.push(response.data);
+								tempEvents = tempEvents.concat(response.data.items);
+							}
+							saveCalendars();
+						}, function (error) {
+							saveCalendars();
+							console.error(error);
+						});
+				}
+
+				function processEvents(items, color, summary, visible) {
 					for (var i = 0; i < items.length; i++) {
 						var item = items[i];
 						item.color = color;
@@ -115,41 +142,34 @@ angular.module('endo')
 							item.epochTime = epochTime;
 							item.parsedStart = DateService.parse(epochTime);
 						}
+						item.visible = visible;
 						item.fullParsedDate = DateService.getFullDate(epochTime);
 						item.searchKey = (item.parsedStart + " " + item.fullParsedDate + " " + item.summary + " " + summary)
 							.toLowerCase();
-
 					}
 				}
 
-				function getEventsForId(id, color, startTime, endTime) {
-					Calendar.listEvents(googleRequestOptions, id, startTime, endTime)
-						.then(function (response) {
-							if (response.data.items.length > 0) {
-								processEvents(response.data.items, color, response.data.summary);
-								response.data.color = color;
-								tempCalendars.push(response.data);
-								tempEvents = tempEvents.concat(response.data.items);
-							}
-							saveCalendars();
-						}, function (error) {
-							saveCalendars();
-							console.error(error);
-						});
-				}
+				$scope.saveVisibility = function (calendar) {
+					for (var i = 0; i < calendar.items.length; i++) {
+						calendar.items[i].visible = calendar.visible;
+					}
+					chrome.storage.local.set({
+						'calendars': $scope.calendars
+					});
+				};
 
 				function saveCalendars() {
 					calendarsLoaded++;
 					if (calendarsLoaded === calendarCount) {
-						if ($scope.events !== tempEvents) {
-							$scope.calendars = tempCalendars.slice();
-							$scope.events = tempEvents.slice();
-							chrome.storage.local.set({
-								'calendars': $scope.calendars,
-								'calLastSync': new Date()
-									.getTime()
-							});
-						}
+						// if ($scope.events !== tempEvents) {
+						$scope.calendars = tempCalendars.slice();
+						$scope.events = tempEvents.slice();
+						chrome.storage.local.set({
+							'calendars': $scope.calendars,
+							'calLastSync': new Date()
+								.getTime()
+						});
+						// }
 					}
 				}
 			}
