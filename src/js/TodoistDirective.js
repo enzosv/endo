@@ -14,66 +14,91 @@ angular.module('endo')
 				$scope.last_sync = 0;
 				var scheduledUpdate = false;
 
+				$scope.$on("sync", function () {
+					console.log("TODOIST RECEIVED SYNC REQUEST");
+					get();
+				});
+
+				$scope.$on("reset", function () {
+					console.log("TODOIST RECEIVED RESET REQUEST");
+					reset();
+				});
+
+				$scope.$on("login", function () {
+					console.log("TODOIST RECEIVED LOGIN REQUEST");
+					login();
+				});
+
+				$scope.$on("add", function () {
+					console.log("TODOIST RECEIVED ADD REQUEST");
+					add();
+				});
+
+				function reset() {
+					$scope.items = [];
+					$scope.token = false;
+					commands = [];
+					seq_g = 0;
+					seq = 0;
+					$scope.projects = {};
+				}
+
 				chrome.storage.sync.get(['token', 'email'], function (sync) {
 					console.log("refresh");
 					if (sync) {
-						$scope.token = sync.token;
-						// $scope.$parent.loggedIn = true;
-
-						$scope.email = sync.email;
-						chrome.storage.local.get(['commands', 'items', 'projects', 'last_sync'], function (local) {
-							if (local) {
-								commands = local.commands;
-								if (!commands) {
-									commands = [];
-								}
-								if (local.items) {
-
-									for (var i = 0; i < local.items.length; i++) {
-										if (local.items[i].due_date) {
-											var newParsedDate = DateService.parse(local.items[i].due_date);
-											// var newParsedDate = parseDate(Date.parse(local.items[i].due_date));
-											var newFullParsedDate = DateService.getFullDate(local.items[i].due_date);
-											local.items[i].searchKey.replace(local.items[i].parsedDate, newParsedDate)
-												.replace(local.items[i].fullParsedDate, newFullParsedDate);
-											local.items[i].parseDate = newParsedDate;
-											local.items[i].fullParsedDate = newFullParsedDate;
-										}
+						if (sync.token && sync.email) {
+							$scope.token = sync.token;
+							$scope.email = sync.email;
+							chrome.storage.local.get(['commands', 'items', 'projects', 'last_sync'], function (local) {
+								if (local) {
+									commands = local.commands;
+									if (!commands) {
+										commands = [];
 									}
-									$scope.items = local.items;
+									if (local.items) {
+
+										for (var i = 0; i < local.items.length; i++) {
+											if (local.items[i].due_date) {
+												var newParsedDate = DateService.parse(local.items[i].due_date);
+												// var newParsedDate = parseDate(Date.parse(local.items[i].due_date));
+												var newFullParsedDate = DateService.getFullDate(local.items[i].due_date);
+												local.items[i].searchKey.replace(local.items[i].parsedDate, newParsedDate)
+													.replace(local.items[i].fullParsedDate, newFullParsedDate);
+												local.items[i].parseDate = newParsedDate;
+												local.items[i].fullParsedDate = newFullParsedDate;
+											}
+										}
+										$scope.items = local.items;
+									} else {
+										$scope.items = [];
+									}
+									$scope.projects = local.projects;
+									if (!$scope.projects) {
+										$scope.projects = {};
+									}
+									$scope.last_sync = local.last_sync;
+									if (!$scope.last_sync) {
+										$scope.last_sync = 0;
+									}
+
+									$scope.$apply();
+									if ($scope.last_sync === 0 || $scope.last_sync < new Date()
+										.getTime() - 300000) {
+										get();
+									}
 								} else {
-									$scope.items = [];
+									$scope.$emit("emitReset");
 								}
-								$scope.projects = local.projects;
-								if (!$scope.projects) {
-									$scope.projects = {};
-								}
-								$scope.last_sync = local.last_sync;
-								if (!$scope.last_sync) {
-									$scope.last_sync = 0;
-								}
-
-								$scope.$apply();
-								if ($scope.last_sync === 0 || $scope.last_sync < new Date()
-									.getTime() - 300000) {
-									// console.log("last synced: " + $filter('timeAgo')($scope.last_sync) + ". Performing sync");
-									console.log("Performing Sync");
-									$scope.todoistGet();
-								}
-								// else {
-								// 	$scope.$apply();
-								// }
-
-							} else {
-								$scope.$emit("emitReset");
-							}
-						});
+							});
+						} else {
+							$scope.$emit("emitReset");
+						}
 					} else {
 						$scope.$emit("emitReset");
 					}
 				});
 
-				$scope.login = function () {
+				function login() {
 					$scope.$emit("emitReset");
 					Todoist.login($scope.email, $scope.psswd)
 						.then(function (response) {
@@ -81,7 +106,7 @@ angular.module('endo')
 							$scope.psswd = nil;
 							$scope.loginError = false;
 							$scope.token = response.data.token;
-							$scope.todoistGet();
+							get();
 							chrome.storage.sync.set({
 								'token': $scope.token,
 								'email': $scope.email
@@ -142,7 +167,8 @@ angular.module('endo')
 					return temp_id;
 				};
 
-				$scope.todoistGet = function () {
+				function get() {
+					console.log("GETTING TODOIST");
 					Todoist.get($scope.token)
 						.then(function (response) {
 							// console.log(data);
@@ -208,14 +234,14 @@ angular.module('endo')
 								'last_sync': $scope.last_sync
 							});
 
-							$scope.todoistUpdate();
+							update();
 							console.log("get success");
 						}, function (error) {
 							console.error("Todoist get error: " + error);
 						});
 				};
 
-				$scope.add = function () {
+				function add() {
 					var dateString = chrono.parse($scope.search)[0];
 					var content;
 					var temp_id = uuid.v1();
@@ -270,7 +296,7 @@ angular.module('endo')
 						'commands': commands,
 						'items': $scope.items,
 					});
-					$scope.todoistUpdate();
+					update();
 					$scope.search = "";
 				};
 
@@ -292,7 +318,7 @@ angular.module('endo')
 							'commands': commands
 								// 'items': $scope.items,
 						});
-						$scope.todoistUpdate();
+						update();
 					}
 				};
 
@@ -311,7 +337,7 @@ angular.module('endo')
 						'commands': commands
 							// 'items': $scope.items,
 					});
-					$scope.todoistUpdate();
+					update();
 				}
 
 				$scope.removeItem = function (item) {
@@ -329,7 +355,7 @@ angular.module('endo')
 							'commands': commands,
 							'items': $scope.items,
 						});
-						$scope.todoistUpdate();
+						update();
 					}
 				};
 
@@ -371,7 +397,7 @@ angular.module('endo')
 									'items': $scope.items
 										// 'projects': $scope.projects
 								});
-								$scope.todoistGet();
+								get();
 								console.log("update success");
 							},
 							function (error) {
@@ -381,9 +407,9 @@ angular.module('endo')
 							});
 				}
 
-				$scope.todoistUpdate = function () {
+				function update() {
 					if (!seq) {
-						$scope.todoistGet();
+						get();
 					}
 					if (commands.length > 0) {
 						console.log(JSON.stringify(commands));
@@ -393,31 +419,6 @@ angular.module('endo')
 						}
 					}
 				};
-
-				$scope.$on("sync", function () {
-					$scope.todoistGet();
-				});
-
-				$scope.$on("reset", function () {
-					reset();
-				});
-
-				$scope.$on("login", function(){
-					$scope.login();
-				});
-
-				$scope.$on("add", function(){
-					$scope.add();
-				});
-
-				function reset() {
-					$scope.items = [];
-					$scope.token = false;
-					commands = [];
-					seq_g = 0;
-					seq = 0;
-					$scope.projects = {};
-				}
 			}
 		}
 	});

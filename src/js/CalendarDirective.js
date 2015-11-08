@@ -12,40 +12,19 @@ angular.module('endo')
 				var tempCalendars = [];
 				var googleRequestOptions = {};
 
-				// refreshCalendar();
-
-				chrome.storage.local.get(['calendars', 'calLastSync'], function (local) {
-					if (local) {
-						if (local.calendars) {
-							$scope.calendars = local.calendars;
-							for (var i = 0; i < local.calendars.length; i++) {
-								processEvents(local.calendars[i].items, local.calendars[i].color, local.calendars[i].summary);
-								$scope.events = $scope.events.concat(local.calendars[i].items);
-							}
-							$scope.$apply();
-							if (local.calLastSync) {
-								if (local.calLastSync < new Date()
-									.getTime() - 300000) {
-									refreshCalendar();
-								} else {
-									console.log(local.calLastSync - new Date()
-										.getTime() - 300000);
-								}
-							} else {
-								refreshCalendar();
-							}
-						} else {
-							refreshCalendar();
-						}
-					}
-				});
-
 				$scope.$on("sync", function () {
+					console.log("CALENDAR RECEIVED SYNC REQUEST");
 					refreshCalendar();
 				});
 
 				$scope.$on("reset", function () {
+					console.log("CALENDAR RECEIVED RESET REQUEST");
 					reset();
+				});
+
+				$scope.$on("login", function () {
+					console.log("CALENDAR RECEIVED LOGIN REQUEST");
+					refreshCalendar();
 				});
 
 				function reset() {
@@ -58,7 +37,38 @@ angular.module('endo')
 					googleRequestOptions = {};
 				}
 
+				chrome.storage.local.get(['calendars', 'calLastSync'], function (local) {
+					if (local) {
+						if (local.calendars) {
+							if (local.calendars.length === 0) {
+								refreshCalendar();
+							} else {
+								$scope.calendars = local.calendars;
+								for (var i = 0; i < local.calendars.length; i++) {
+									processEvents(local.calendars[i].items, local.calendars[i].color, local.calendars[i].summary);
+									$scope.events = $scope.events.concat(local.calendars[i].items);
+								}
+								$scope.$apply();
+								if (local.calLastSync) {
+									if (local.calLastSync < new Date()
+										.getTime() - 300000) {
+										refreshCalendar();
+									} else {
+										console.log(local.calLastSync - new Date()
+											.getTime() - 300000);
+									}
+								} else {
+									refreshCalendar();
+								}
+							}
+						} else {
+							refreshCalendar();
+						}
+					}
+				});
+
 				function refreshCalendar() {
+					console.log("GETTING CALENDAR");
 					chrome.identity.getAuthToken({
 						'interactive': true
 					}, function (token) {
@@ -79,6 +89,8 @@ angular.module('endo')
 								endTime = endTime.toISOString();
 								calendarCount = calendars.length;
 								calendarsLoaded = 0;
+								tempEvents = [];
+								tempCalendars = [];
 								for (var i = 0; i < calendars.length; i++) {
 									getEventsForId(calendars[i].id, calendars[i].backgroundColor, startTime, endTime);
 
@@ -119,35 +131,29 @@ angular.module('endo')
 								tempCalendars.push(response.data);
 								tempEvents = tempEvents.concat(response.data.items);
 							}
-							calendarsLoaded++;
-							if (calendarsLoaded === calendarCount) {
-								if ($scope.events !== tempEvents) {
-									$scope.calendars = tempCalendars;
-									$scope.events = tempEvents;
-									console.log($scope.events);
-									chrome.storage.local.set({
-										'calendars': $scope.calendars,
-										'calLastSync': new Date()
-											.getTime()
-									});
-								}
-							}
+							saveCalendars();
 						}, function (error) {
-							calendarsLoaded++;
-							if (calendarsLoaded === calendarCount) {
-								if ($scope.events !== tempEvents) {
-									$scope.calendars = tempCalendars;
-									$scope.events = tempEvents;
-									chrome.storage.local.set({
-										'calendars': $scope.calendars,
-										'calLastSync': new Date()
-											.getTime()
-									});
-								}
-							}
+							saveCalendars();
 							console.error(error);
 						});
 				}
+
+				function saveCalendars() {
+					calendarsLoaded++;
+					if (calendarsLoaded === calendarCount) {
+						if ($scope.events !== tempEvents) {
+							$scope.calendars = tempCalendars.slice();
+							$scope.events = tempEvents.slice();
+							chrome.storage.local.set({
+								'calendars': $scope.calendars,
+								'calLastSync': new Date()
+									.getTime()
+							});
+						}
+					}
+				}
 			}
+
+
 		};
 	});

@@ -1,6 +1,6 @@
 "use strict";
 angular.module('endo')
-	.controller('MainController', function ($scope, DateService, Todoist) {
+	.controller('MainController', function ($scope) {
 		console.log("loaded controller");
 		$scope.loggedIn = true;
 
@@ -15,7 +15,7 @@ angular.module('endo')
 			$scope.loggedIn = false;
 		};
 
-		$scope.login = function(){
+		$scope.mainLogin = function(){
 			$scope.$broadcast("login");
 		};
 
