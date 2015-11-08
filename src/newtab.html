@@ -16,6 +16,9 @@
     <script type="text/javascript" src="/bower_components/angular-timeago/dist/angular-timeago.js"></script>
     <script type="text/javascript" src="/bower_components/mousetrap/mousetrap.js"></script>
     <script type="text/javascript" src="/js/app.js"></script>
+    <script type="text/javascript" src="/js/MainController.js"></script>
+    <!-- <script type="text/javascript" src="/js/TodoistController.js"></script> -->
+    <script type="text/javascript" src="/js/CalendarDirective.js"></script>
     <script type="text/javascript" src="/js/taskDirective.js"></script>
     <script type="text/javascript" src="/js/eventDirective.js"></script>
     <script type="text/javascript" src="/js/chromeService.js"></script>
@@ -25,8 +28,8 @@
     <!-- endbuild -->
 </head>
 
-<body ng-controller="MainController">
-    <div ng-show="token" style="width:98%; margin:0 auto; margin-top:1%;">
+<body ng-controller="MainController" id="MainController">
+    <div style="width:98%; margin:0 auto; margin-top:1%;">
         <div style="width:80%; margin:0 auto;">
             <input type="text" style="width: calc(100% - {{search ? '64' : '0'}}px)" class="form-control pull-left mousetrap" placeholder="Search" ng-model="search" id="searchField">
             <input type="button" style="width:56px;" class="btn btn-default pull-right" value="Add" ng-click="add()" ng-show="search">
@@ -35,21 +38,7 @@
         <br>
         <br>
         <div class="row" style:"height:500px;">
-            <div class="col-md-6">
-                <table class="table table-bordered table-hover" style="margin-top: 2%;">
-                    <th>Google Calendar
-                        <small ng-repeat="calendar in calendars">
-                        <label style="color:{{calendar.color}};">
-                            <input type="checkbox" ng-model="calendar.visible" ng-change="saveProjects()" value="calendar.summary"><span></span>
-                        </label>
-                        {{calendar.summary}}
-                    </small>
-                    </th>
-                    <tbody>
-                        <tr ng-repeat="event in events | orderBy:'epochTime' | stringContainsAllOfString:search:'searchKey'" event>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="col-md-6" calendar>
             </div>
             <div class="col-md-6">
                 <table class="table table-bordered table-hover" style="margin-top: 2%; overflow:auto;">
