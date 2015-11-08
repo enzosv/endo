@@ -15,7 +15,7 @@
 	"oauth2": {
 		"client_id":"<CLIENT_ID>.apps.googleusercontent.com",
 		"scopes": [
-			"https://www.googleapis.com/auth/calendar.readonly"
+			"https://www.googleapis.com/auth/calendar"
 		]
 	},
 	"key":"<APPLICATION_KEY>"

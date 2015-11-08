@@ -10,7 +10,7 @@ angular.module('endo')
 				var calendarsLoaded = 0;
 				var tempEvents = [];
 				var tempCalendars = [];
-				var googleRequestOptions = {};
+				var oAuthToken;
 
 				$scope.$on("sync", function () {
 					console.log("CALENDAR RECEIVED SYNC REQUEST");
@@ -27,6 +27,31 @@ angular.module('endo')
 					refreshCalendar();
 				});
 
+				$scope.$on("addEvent", function () {
+					console.log("CALENDAR RECEIVED ADD REQUEST");
+
+					var calendarName = $scope.search.split("#");
+					var query;
+					if (calendarName.length > 1) {
+						calendarName = calendarName[1].split(" ")[0];
+						query = $scope.search.replace("#" + calendarName, "");
+						Calendar.addEvent(oAuthToken, getCalendarIdWithName(calendarName), query)
+							.then(function (response) {
+								refreshCalendar();
+							}, function (error) {
+								console.error(error);
+							});
+					} else {
+						Calendar.addEvent(oAuthToken, getCalendarIdWithName(calendarName), $scope.search)
+							.then(function (response) {
+								refreshCalendar();
+							}, function (error) {
+								console.error(error);
+							});
+					}
+					$scope.search = "";
+				});
+
 				function reset() {
 					$scope.calendars = [];
 					$scope.events = [];
@@ -34,7 +59,7 @@ angular.module('endo')
 					calendarsLoaded = 0;
 					tempEvents = [];
 					tempCalendars = [];
-					googleRequestOptions = {};
+					oAuthToken = "";
 				}
 
 				chrome.storage.local.get(['calendars', 'calLastSync'], function (local) {
@@ -56,6 +81,11 @@ angular.module('endo')
 									} else {
 										console.log(local.calLastSync - new Date()
 											.getTime() - 300000);
+										chrome.identity.getAuthToken({
+											'interactive': true
+										}, function (token) {
+											oAuthToken = token;
+										});
 									}
 								} else {
 									refreshCalendar();
@@ -72,13 +102,8 @@ angular.module('endo')
 					chrome.identity.getAuthToken({
 						'interactive': true
 					}, function (token) {
-						googleRequestOptions = {
-							headers: {
-								'Authorization': 'OAuth ' + token,
-								'Content-Type': 'application/json'
-							}
-						};
-						Calendar.listCalendars(googleRequestOptions)
+						oAuthToken = token;
+						Calendar.listCalendars(token)
 							.then(function (response) {
 
 								var calendars = response.data.items;
@@ -101,19 +126,19 @@ angular.module('endo')
 				}
 
 				function getEventsForId(id, color, startTime, endTime) {
-					Calendar.listEvents(googleRequestOptions, id, startTime, endTime)
+					Calendar.listEvents(oAuthToken, id, startTime, endTime)
 						.then(function (response) {
 							if (response.data.items.length > 0) {
 								response.data.color = color;
 								var matchedOld = false;
 								for (var i = 0; i < $scope.calendars.length; i++) {
-									if($scope.calendars[i].id === id){
+									if ($scope.calendars[i].id === id) {
 										response.data.visible = $scope.calendars[i].visible;
 										matchedOld = true;
 										break;
 									}
 								}
-								if(!matchedOld){
+								if (!matchedOld) {
 									response.data.visible = true;
 								}
 								response.data.id = id;
@@ -170,6 +195,15 @@ angular.module('endo')
 								.getTime()
 						});
 						// }
+					}
+				}
+
+				function getCalendarIdWithName(name) {
+					for (var i = 0; i < $scope.calendars.length; i++) {
+						if ($scope.calendars[i].summary === name) {
+							console.log($scope.calendars[i].id);
+							return $scope.calendars[i].id;
+						}
 					}
 				}
 			}

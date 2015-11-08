@@ -15,7 +15,6 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 			}
 			var scope = angular.element(document.getElementById('MainController')).scope();
 			if (scope.search.length > 0) {
-				console.log("adding");
 				scope.add();
 			}
 			return false;

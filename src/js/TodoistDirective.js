@@ -29,7 +29,7 @@ angular.module('endo')
 					login();
 				});
 
-				$scope.$on("add", function () {
+				$scope.$on("addTask", function () {
 					console.log("TODOIST RECEIVED ADD REQUEST");
 					add();
 				});
