@@ -1,0 +1,14 @@
+<table class="table table-bordered table-hover" style="margin-top: 2%; overflow:auto;">
+    <th>Todoist
+        <small ng-repeat="project in projects">
+            <label style="color:{{project.color}};">
+                <input type="checkbox" ng-model="project.visible" ng-change="saveProjects()" value="project.name"><span></span>
+            </label>
+            {{project.name}}
+        </small>
+    </th>
+    <tbody>
+        <tr ng-repeat="item in items | stringContainsAllOfString:search:'searchKey'" task ng-mouseenter="mouseenter()" ng-mouseleave="mouseleave()" ng-show="search.length > 0 || projects[item.project_id].visible">
+        </tr>
+    </tbody>
+</table>

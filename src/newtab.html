@@ -17,11 +17,10 @@
     <script type="text/javascript" src="/bower_components/mousetrap/mousetrap.js"></script>
     <script type="text/javascript" src="/js/app.js"></script>
     <script type="text/javascript" src="/js/MainController.js"></script>
-    <!-- <script type="text/javascript" src="/js/TodoistController.js"></script> -->
+    <script type="text/javascript" src="/js/TodoistDirective.js"></script>
     <script type="text/javascript" src="/js/CalendarDirective.js"></script>
     <script type="text/javascript" src="/js/taskDirective.js"></script>
     <script type="text/javascript" src="/js/eventDirective.js"></script>
-    <script type="text/javascript" src="/js/chromeService.js"></script>
     <script type="text/javascript" src="/js/dateService.js"></script>
     <script type="text/javascript" src="/js/calendarService.js"></script>
     <script type="text/javascript" src="/js/todoistService.js"></script>
@@ -29,7 +28,7 @@
 </head>
 
 <body ng-controller="MainController" id="MainController">
-    <div style="width:98%; margin:0 auto; margin-top:1%;">
+    <div style="width:98%; margin:0 auto; margin-top:1%;" ng-show="loggedIn">
         <div style="width:80%; margin:0 auto;">
             <input type="text" style="width: calc(100% - {{search ? '64' : '0'}}px)" class="form-control pull-left mousetrap" placeholder="Search" ng-model="search" id="searchField">
             <input type="button" style="width:56px;" class="btn btn-default pull-right" value="Add" ng-click="add()" ng-show="search">
@@ -37,34 +36,20 @@
         </div>
         <br>
         <br>
-        <div class="row" style:"height:500px;">
+        <div class="row" style: "height:500px;">
             <div class="col-md-6" calendar>
             </div>
-            <div class="col-md-6">
-                <table class="table table-bordered table-hover" style="margin-top: 2%; overflow:auto;">
-                    <th>Todoist
-                        <small ng-repeat="project in projects">
-                        <label style="color:{{project.color}};">
-                            <input type="checkbox" ng-model="project.visible" ng-change="saveProjects()" value="project.name"><span></span>
-                        </label>
-                        {{project.name}}
-                    </small>
-                    </th>
-                    <tbody>
-                        <tr ng-repeat="item in items | stringContainsAllOfString:search:'searchKey'" task ng-mouseenter="mouseenter()" ng-mouseleave="mouseleave()" ng-show="search.length > 0 || projects[item.project_id].visible">
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="col-md-6" todoist>
             </div>
         </div>
     </div>
-    <center ng-show="token">
+    <center ng-show="loggedIn">
         Last Synced: {{last_sync | timeAgo}}
-        <a href="" ng-click="todoistGet()">Sync</a>
-        <br> {{email}} <a href="" ng-click="resetAll()">Logout</a>
+        <a href="" ng-click="sync()">Sync</a>
+        <br> {{email}} <a href="" ng-click="reset()">Logout</a>
         <br> For edits, visit <a href="https://todoist.com/app">Todoist</a>
     </center>
-    <form ng-hide="token" class="form-horizontal" ng-submit="login()" style="margin-top:10%; width:30%; margin:0 auto">
+    <form ng-hide="loggedIn" class="form-horizontal" ng-submit="login()" style="margin-top:10%; width:30%; margin:0 auto">
         <h3><center>A <a href="https://todoist.com/app">Todoist</a> new tab page</center></h3>
         <center>by <a href="https://github.com/enzosv">enzosv</a></center>
         <div class="alert alert-danger" role="alert" ng-show="loginError">
