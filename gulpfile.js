@@ -11,7 +11,7 @@ var gulp = require('gulp'),
     del = require('del'),
     htmlmin = require('gulp-htmlmin'),
     // purify = require('gulp-purifycss'),
-    zip = require('gulp-zip'),
+    zip = require('gulp-vinyl-zip'),
     replace = require('gulp-replace'),
     rename = require("gulp-rename");
 
@@ -39,7 +39,7 @@ gulp.task('minify-assets', function () {
 gulp.task('minify-html', function () {
     return gulp.src('src/html/*.html')
         .pipe(htmlmin({
-            collapseWhitespace: true
+            collapseWhitespace: false
         }))
         .pipe(gulp.dest(packageName+'/html'));
 });
@@ -74,9 +74,8 @@ gulp.task('clean-zip', function () {
 });
 
 gulp.task('zip', function () {
-    return gulp.src(packageName+'/*')
-        .pipe(zip(packageName + '.zip'))
-        .pipe(gulp.dest(''));
+    return gulp.src(packageName+"/**/*")
+        .pipe(zip.dest(packageName+'.zip'));
 });
 
 gulp.task('replace-manifest', function(){

@@ -1,9 +1,8 @@
 # Endo
-Simple [Todoist](https://todoist.com/) newtab chrome extension with offline capabilities
+Simple [Todoist](https://todoist.com/) and Google Calendar new tab page
 
 ## Installation
-Download [endo.crx](https://raw.githubusercontent.com/enzosv/endo/master/endo.crx)
-and drag and drop to chrome extensions page (chrome://extensions/)
+[Download from Chrome Store](https://chrome.google.com/webstore/detail/endo/cooolpanghnclajpbeemmimmojnamnpi)
 
 ## Screenshots
 ![alt tag](https://raw.githubusercontent.com/enzosv/endo/master/screenshot.png)
