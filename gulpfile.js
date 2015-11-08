@@ -27,7 +27,7 @@ gulp.task('minify-assets', function () {
             ignore: [
                 /\.table/
             ],
-            html: ["src/*.html"]
+            html: ["src/*.html", "src/html/*.html"]
         })))
         // .pipe(gulpif('*.css', purify(['src/*.html'])))
         .pipe(gulpif('*.css', csso()))
@@ -37,11 +37,11 @@ gulp.task('minify-assets', function () {
 });
 
 gulp.task('minify-html', function () {
-    return gulp.src(packageName + '/*.html')
+    return gulp.src('src/html/*.html')
         .pipe(htmlmin({
             collapseWhitespace: true
         }))
-        .pipe(gulp.dest(packageName));
+        .pipe(gulp.dest(packageName+'/html'));
 });
 
 gulp.task('clean-folder', function () {
@@ -92,11 +92,11 @@ gulp.task('pack', shell.task([
 ]));
 
 gulp.task('default', function (callback) {
-    runSequence('minify-assets', ['pack', 'zip', 'replace-manifest'],
+    runSequence(['minify-assets', 'minify-html'], ['pack', 'zip', 'replace-manifest'],
         callback);
 });
 
 gulp.task('recreate', function (callback) {
-    runSequence(['clean-folder', 'clean-crx', 'clean-zip'], ['minify-assets', 'copy-manifest', 'copy-font'], ['pack', 'zip', 'replace-manifest'],
+    runSequence(['clean-folder', 'clean-crx', 'clean-zip'], ['minify-assets', 'minify-html', 'copy-manifest', 'copy-font'], ['pack', 'zip', 'replace-manifest'],
         callback);
 });

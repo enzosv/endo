@@ -1,48 +1,8 @@
 "use strict";
 angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
-	.controller('MainController', function ($http, $scope, $filter) {
+	.controller('MainController', function ($http, $scope, DateService, Calendar, Todoist) {
 
-		var isTimeless = function (date) {
-			date = new Date(date);
-			if ((date.getHours() === 0 && date.getMinutes() === 0) || (date.getHours() === 23 && date.getMinutes() === 59)) {
-				return true;
-			}
-
-			return false;
-		};
-
-		var now = new Date()
-			.getTime();
-		var parseDate = function (date) {
-			var parsedDate = new Date(date)
-				.getTime();
-			if (parsedDate > now) {
-				var format;
-				if (parsedDate < now + 86400000) {
-					if (isTimeless(parsedDate)) {
-						format = "'Today'";
-					} else {
-						format = "h:mm a";
-					}
-				} else if (parsedDate < now + 172800000) {
-					if (isTimeless(parsedDate)) {
-						format = "'Tomorrow'";
-					} else {
-						format = "'Tomorrow' h:mm a";
-					}
-				} else if (parsedDate < now + 604800000) {
-					format = "EEE, MMM d";
-				} else if (parsedDate < now + 2592000000) {
-					format = "MMM d";
-				} else {
-					format = "MMM yyyy";
-				}
-				return $filter('date')(parsedDate, format);
-			} else {
-				return $filter('timeAgo')(date);
-			}
-		};
-
+		console.log("loaded controller");
 		$scope.calendars = [];
 		$scope.events = [];
 		var googleRequestOptions;
@@ -96,6 +56,8 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 			seq_g = 0;
 			seq = 0;
 			$scope.projects = {};
+			$scope.calendars = [];
+			$scope.events = [];
 			chrome.storage.sync.clear();
 			chrome.storage.local.clear();
 		};
@@ -115,8 +77,9 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 
 							for (var i = 0; i < local.items.length; i++) {
 								if (local.items[i].due_date) {
-									var newParsedDate = parseDate(Date.parse(local.items[i].due_date));
-									var newFullParsedDate = $filter('date')(local.items[i].due_date, "yyyy MMMM EEEE d");
+									var newParsedDate = DateService.parse(local.items[i].due_date);
+									// var newParsedDate = parseDate(Date.parse(local.items[i].due_date));
+									var newFullParsedDate = DateService.getFullDate(local.items[i].due_date);
 									local.items[i].searchKey.replace(local.items[i].parsedDate, newParsedDate)
 										.replace(local.items[i].fullParsedDate, newFullParsedDate);
 									local.items[i].parseDate = newParsedDate;
@@ -139,8 +102,6 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						// $scope.calendars = local.calendars;
 						if (local.events) {
 							$scope.events = local.events;
-						} else {
-							refreshCalendar();
 						}
 						// } else{
 						// refreshCalendar();
@@ -149,9 +110,10 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						$scope.$apply();
 						if ($scope.last_sync === 0 || $scope.last_sync < new Date()
 							.getTime() - 300000) {
-							console.log("last synced: " + $filter('timeAgo')($scope.last_sync) + ". Performing sync");
+							// console.log("last synced: " + $filter('timeAgo')($scope.last_sync) + ". Performing sync");
+							console.log("Performing Sync");
 							$scope.todoistGet();
-							refreshCalendar();
+							// refreshCalendar();
 						}
 						// else {
 						// 	$scope.$apply();
@@ -176,9 +138,9 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						'Content-Type': 'application/json'
 					}
 				};
-				$http.get("https://www.googleapis.com/calendar/v3/users/me/calendarList", googleRequestOptions)
+				Calendar.listCalendars(googleRequestOptions)
 					.then(function (response) {
-						
+
 						var calendars = response.data.items;
 						var startTime = new Date()
 							.toISOString();
@@ -197,7 +159,7 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 
 
 		function getEventsForId(id, color, startTime, endTime) {
-			$http.get("https://www.googleapis.com/calendar/v3/calendars/" + id + "/events?timeMin=" + startTime + "&timeMax=" + endTime + "&singleEvents=true&orderBy=startTime&maxAtendees=0", googleRequestOptions)
+			Calendar.listEvents(googleRequestOptions, id, startTime, endTime)
 				.then(function (response) {
 					if (response.data.items.length > 0) {
 						for (var i = 0; i < response.data.items.length; i++) {
@@ -207,13 +169,13 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 							if (item.start.date) {
 								epochTime = Date.parse(item.start.date);
 								item.epochTime = epochTime;
-								item.parsedStart = parseDate(epochTime);
+								item.parsedStart = DateService.parse(epochTime);
 							} else {
 								epochTime = Date.parse(item.start.dateTime);
 								item.epochTime = epochTime;
-								item.parsedStart = parseDate(epochTime);
+								item.parsedStart = DateService.parse(epochTime);
 							}
-							item.fullParsedDate = $filter('date')(epochTime, 'yyyy MMMM EEEE d');
+							item.fullParsedDate = DateService.getFullDate(epochTime);
 							item.searchKey = (item.parsedStart + " " + item.fullParsedDate + " " + item.summary + " " + response.data.summary)
 								.toLowerCase();
 
@@ -249,23 +211,19 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 
 		$scope.login = function () {
 			$scope.resetAll();
-			$http.get("https://todoist.com/API/v6/login", {
-					params: {
-						email: $scope.email,
-						password: $scope.psswd
-					}
-				})
+			Todoist.login($scope.email, $scope.psswd)
 				.then(function (response) {
 					var nil;
 					$scope.psswd = nil;
 					$scope.loginError = false;
 					$scope.token = response.data.token;
 					$scope.todoistGet();
+					// refreshCalendar();
 					chrome.storage.sync.set({
 						'token': $scope.token,
 						'email': $scope.email
 					});
-					refreshCalendar();
+					
 				}, function (error) {
 					var nil;
 					// $scope.email = nil;
@@ -328,18 +286,11 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 			// 		resource_types: '["all"]'
 			// 	}
 			// }
-			$http({
-					method: "GET",
-					url: "https://todoist.com/API/v6/sync",
-					params: {
-						token: $scope.token,
-						seq_no: 0,
-						seq_no_global: 0,
-						resource_types: '["items", "projects"]'
-					}
-				})
-				.success(function (data) {
+			refreshCalendar();
+			Todoist.get($scope.token)
+				.then(function (response) {
 					// console.log(data);
+					var data = response.data;
 					var projectColors = ["#95ef63", "#ff8581", "#ffc471", "#f9ec75", "#a8c8e4", "#d2b8a3", "#e2a8e4", "#cccccc", "#fb886e", "#ffcc00", "#74e8d3", "#3bd5fb"];
 					var projectClone = {};
 					// if(!seq && !seq_g){
@@ -370,15 +321,16 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 						}
 
 					}
-					$scope.last_sync = now;
+					$scope.last_sync = new Date()
+						.getTime();
 
 					for (var j = 0; j < data.Items.length; j++) {
 						var item = data.Items[j];
 						item.project_name = $scope.projects[item.project_id].name;
 						item.color = $scope.projects[item.project_id].color;
 						if (item.due_date) {
-							item.parsedDate = parseDate(Date.parse(item.due_date));
-							item.fullParsedDate = $filter('date')(Date.parse(item.due_date), 'yyyy MMMM EEEE d');
+							item.parsedDate = DateService.parse(Date.parse(item.due_date));
+							item.fullParsedDate = DateService.getFullDate(item.due_date);
 						} else {
 							item.parsedDate = "";
 							item.fullParsedDate = "";
@@ -402,9 +354,8 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 
 					$scope.todoistUpdate();
 					console.log("get success");
-				})
-				.error(function (error) {
-					console.error("sync error: " + error);
+				}, function (error) {
+					console.error("Todoist get error: " + error);
 				});
 		};
 
@@ -528,56 +479,51 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 		};
 
 		function performUpdate() {
-			$http({
-					method: "GET",
-					url: "https://todoist.com/API/v6/sync",
-					params: {
-						token: $scope.token,
-						commands: JSON.stringify(commands)
-					}
-				})
-				.success(function (data) {
-					scheduledUpdate = false;
-					// for (var key in data.TempIdMapping) {
-					// 	for (var i = $scope.items.length - 1; i >= 0; i--) {
-					// 		if ($scope.items[i].id === key) {
-					// 			$scope.items[i].id = data.TempIdMapping[key];
-					// 		}
-					// if ($scope.items[i].project_id === key) {
-					// 	$scope.items[i].project_id = data.TempIdMapping[key];
-					// }
-					// }
-					// for (var proj in $scope.projects) {
-					// 	if (proj === key) {
-					// 		$scope.projects[key] = {
-					// 			name: $scope.projects[proj].name,
-					// 			visible: $scope.projects[proj].visible,
-					// 			color: $scope.projects[proj].color
-					// 		};
-					// 		delete $scope.projects[proj];
-					// 	}
-					// }
-					// }
+			Todoist.post($scope.token, JSON.stringify(commands))
+				.then(
+					function (response) {
+						var data = response.data;
+						scheduledUpdate = false;
+						// for (var key in data.TempIdMapping) {
+						// 	for (var i = $scope.items.length - 1; i >= 0; i--) {
+						// 		if ($scope.items[i].id === key) {
+						// 			$scope.items[i].id = data.TempIdMapping[key];
+						// 		}
+						// if ($scope.items[i].project_id === key) {
+						// 	$scope.items[i].project_id = data.TempIdMapping[key];
+						// }
+						// }
+						// for (var proj in $scope.projects) {
+						// 	if (proj === key) {
+						// 		$scope.projects[key] = {
+						// 			name: $scope.projects[proj].name,
+						// 			visible: $scope.projects[proj].visible,
+						// 			color: $scope.projects[proj].color
+						// 		};
+						// 		delete $scope.projects[proj];
+						// 	}
+						// }
+						// }
 
-					console.log(data);
-					commands = [];
-					// seq = data.seq_no;
-					// seq_g = data.seq_no_global;
-					seq = 0;
-					seq_g = 0;
-					chrome.storage.local.set({
-						'commands': commands,
-						'items': $scope.items
-							// 'projects': $scope.projects
+						console.log(data);
+						commands = [];
+						// seq = data.seq_no;
+						// seq_g = data.seq_no_global;
+						seq = 0;
+						seq_g = 0;
+						chrome.storage.local.set({
+							'commands': commands,
+							'items': $scope.items
+								// 'projects': $scope.projects
+						});
+						$scope.todoistGet();
+						console.log("update success");
+					},
+					function (error) {
+						scheduledUpdate = false;
+						console.error("update error: ");
+						console.error(error);
 					});
-					$scope.todoistGet();
-					console.log("update success");
-				})
-				.error(function (error) {
-					scheduledUpdate = false;
-					console.error("update error: ");
-					console.error(error);
-				});
 		}
 
 		$scope.todoistUpdate = function () {
@@ -593,37 +539,4 @@ angular.module('endo', ['angular-stringcontains', 'yaru22.angular-timeago'])
 			}
 		};
 
-	})
-	.directive("row", function () {
-		return {
-			templateUrl: "row.html",
-			controller: function ($scope) {
-				$scope.hover = false;
-				$scope.complete = function () {
-					$scope.$parent.completeItem($scope.item);
-				};
-
-				$scope.uncomplete = function () {
-					$scope.$parent.uncompleteItem($scope.item);
-				};
-
-				$scope.remove = function () {
-					$scope.$parent.removeItem($scope.item);
-				};
-
-				$scope.mouseenter = function () {
-					$scope.hover = true;
-				};
-
-				$scope.mouseleave = function () {
-					$scope.hover = false;
-				};
-			}
-		}
-	})
-	.directive("event", function () {
-		return {
-			templateUrl: "event.html",
-			controller: function ($scope) {}
-		}
 	});

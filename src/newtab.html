@@ -5,17 +5,23 @@
         Endo
     </title>
     <!-- build:css combined.min.css -->
-    <link rel="stylesheet" type="text/css" href="./css/bootstrap-solarized-light.css">
-    <link rel="stylesheet" type="text/css" href="./css/icons.css">
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-solarized-light.css">
+    <link rel="stylesheet" type="text/css" href="/css/icons.css">
     <!-- endbuild -->
     <!-- build:js combined.min.js -->
-    <script type="text/javascript" src="bower_components/angular/angular.js"></script>
-    <script type="text/javascript" src="bower_components/angular-stringcontains/angular-stringcontains.js"></script>
-    <script type="text/javascript" src="bower_components/node-uuid/uuid.js"></script>
-    <script type="text/javascript" src="bower_components/chrono/chrono.js"></script>
-    <script type="text/javascript" src="bower_components/angular-timeago/dist/angular-timeago.js"></script>
-    <script type="text/javascript" src="bower_components/mousetrap/mousetrap.js"></script>
-    <script type="text/javascript" src="app.js"></script>
+    <script type="text/javascript" src="/bower_components/angular/angular.js"></script>
+    <script type="text/javascript" src="/bower_components/angular-stringcontains/angular-stringcontains.js"></script>
+    <script type="text/javascript" src="/bower_components/node-uuid/uuid.js"></script>
+    <script type="text/javascript" src="/bower_components/chrono/chrono.js"></script>
+    <script type="text/javascript" src="/bower_components/angular-timeago/dist/angular-timeago.js"></script>
+    <script type="text/javascript" src="/bower_components/mousetrap/mousetrap.js"></script>
+    <script type="text/javascript" src="/js/app.js"></script>
+    <script type="text/javascript" src="/js/taskDirective.js"></script>
+    <script type="text/javascript" src="/js/eventDirective.js"></script>
+    <script type="text/javascript" src="/js/chromeService.js"></script>
+    <script type="text/javascript" src="/js/dateService.js"></script>
+    <script type="text/javascript" src="/js/calendarService.js"></script>
+    <script type="text/javascript" src="/js/todoistService.js"></script>
     <!-- endbuild -->
 </head>
 
@@ -56,7 +62,7 @@
                     </small>
                     </th>
                     <tbody>
-                        <tr ng-repeat="item in items | stringContainsAllOfString:search:'searchKey'" row ng-mouseenter="mouseenter()" ng-mouseleave="mouseleave()" ng-show="search.length > 0 || projects[item.project_id].visible">
+                        <tr ng-repeat="item in items | stringContainsAllOfString:search:'searchKey'" task ng-mouseenter="mouseenter()" ng-mouseleave="mouseleave()" ng-show="search.length > 0 || projects[item.project_id].visible">
                         </tr>
                     </tbody>
                 </table>
