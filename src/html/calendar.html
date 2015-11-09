@@ -1,15 +1,21 @@
-<table class="table table-bordered table-hover" style="margin-top: 2%;">
-    <th>Google Calendar
-        <small ng-repeat="calendar in calendars">
+<table class="table table-bordered" style="table-layout:fixed;">
+    <thead>
+        <th>Google Calendar
+            <small ng-repeat="calendar in calendars">
             <label style="color:{{calendar.color}};">
                 <input type="checkbox" ng-model="calendar.visible" ng-change="saveVisibility(calendar)" value="calendar.summary">
                 <span></span>
             </label>
             {{calendar.summary}}
         </small>
-    </th>
-    <tbody>
-        <tr ng-repeat="event in events | orderBy:'epochTime' | stringContainsAllOfString:search:'searchKey'" event ng-show="search.length > 0 || event.visible"> 
-        </tr>
-    </tbody>
+        </th>
+    </thead>
 </table>
+<div style="overflow-y:auto; height:66%; margin-top:-22px;">
+    <table class="table table-bordered table-hover" style="table-layout:fixed">
+        <tbody>
+            <tr ng-repeat="event in events | orderBy:'epochTime' | stringContainsAllOfString:search:'searchKey'" event ng-show="search.length > 0 || event.visible">
+            </tr>
+        </tbody>
+    </table>
+</div>

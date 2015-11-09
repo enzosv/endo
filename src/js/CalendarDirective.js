@@ -107,8 +107,11 @@ angular.module('endo')
 							.then(function (response) {
 
 								var calendars = response.data.items;
-								var startTime = new Date()
-									.toISOString();
+								var startTime = new Date();
+								startTime.setHours(0);
+								startTime.setMinutes(0);
+								startTime.setSeconds(0);
+								startTime = startTime.toISOString();
 								var endTime = new Date();
 								endTime.setDate(endTime.getDate() + 14);
 								endTime = endTime.toISOString();

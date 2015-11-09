@@ -1,10 +1,10 @@
 <td style="height:64px;">
     <ul class="middle nav">
         <li>
-            <button style="background-color: transparent; color:{{event.color}}; padding-top:8px; border:none; height:42px; width:42px" class="icon-check-empty pull-left"></button>
+            <div ng-show="event.start.date" style="color:{{event.color}}; padding-top:8px; padding-left:8px; border:none; height:42px; width:42px" class="icon-circle-full pull-left"></div>
+            <div ng-show="event.start.dateTime" style="color:{{event.color}}; padding-top:8px; padding-left:8px; border:none; height:42px; width:42px" class="icon-circle-empty pull-left"></div>
             {{event.summary}}
             <br><small>{{event.parsedStart}}</small>
-            <!-- <br><small ng-show="event.start.date">{{event.start.date | date}}</small><small ng-show="event.start.dateTime">{{event.start.dateTime | date}}</small> -->
         </li>
     </ul>
 </td>

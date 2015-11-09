@@ -36,14 +36,14 @@
         </div>
         <br>
         <br>
-        <div class="row" style: "height:500px;">
+        <div class="row">
             <div class="col-md-6" calendar>
             </div>
             <div class="col-md-6" todoist>
             </div>
         </div>
     </div>
-    <center ng-show="loggedIn">
+    <center ng-show="loggedIn" style="margin-top:2%;">
         Last Synced: {{last_sync | timeAgo}}
         <a href="" ng-click="sync()">Sync</a>
         <br> {{email}} <a href="" ng-click="reset()">Logout</a>

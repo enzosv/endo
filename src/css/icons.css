@@ -42,6 +42,18 @@ button[type="icon"] + span:before{
     content: '\e801';
 }
 
+.icon-circle-full:before{
+    font-family: 'endo';
+    font-size: 26px;
+    content: '\e803';
+}
+
+.icon-circle-empty:before{
+    font-family: 'endo';
+    font-size: 26px;
+    content: '\e802';
+}
+
 .icon-trash-empty:before {
 	font-family: 'endo';
     content: '\e804';
