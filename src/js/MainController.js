@@ -19,30 +19,19 @@ angular.module('endo')
 		};
 
 		$scope.add = function () {
-			var dateString = chrono.parse($scope.search)[0];
-			if(dateString){
-				// console.log(dateString);
-				$scope.$broadcast("addEvent");
-			} else{
+			if ($scope.search.indexOf("/task") > -1) {
+				$scope.search = $scope.search.replace("/task", "");
 				$scope.$broadcast("addTask");
-				// console.log("no date specified");
+			} else {
+				console.log($scope.search);
+				$scope.search = $scope.search.replace("/task", "");
+				var dateString = chrono.parse($scope.search)[0];
+				if (dateString) {
+					$scope.$broadcast("addEvent");
+				} else {
+					$scope.$broadcast("addTask");
+				}
 			}
-			// if (dateString) {
-			// 	dateString = dateString.text;
-			// 	content = $scope.search.replace(dateString, "");
-			// 	$scope.items.unshift({
-			// 		content: content,
-			// 		parsedDate: dateString.charAt(0)
-			// 			.toUpperCase() + dateString.slice(1),
-			// 		id: temp_id,
-			// 		project_name: projectName,
-			// 		due_date: true,
-			// 		project_id: project_id,
-			// 		color: $scope.projects[project_id].color,
-			// 		searchKey: (content + " " + dateString + " #" + projectName)
-			// 			.toLowerCase()
-			// 	});
-			// }
 		};
 
 		$scope.$on("loggedIn", function () {
