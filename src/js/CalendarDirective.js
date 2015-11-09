@@ -199,6 +199,9 @@ angular.module('endo')
 				}
 
 				function getCalendarIdWithName(name) {
+					if(name.indexOf("-") > -1){
+						name = name.split("-").join(" ");
+					}
 					for (var i = 0; i < $scope.calendars.length; i++) {
 						if ($scope.calendars[i].summary === name) {
 							console.log($scope.calendars[i].id);
