@@ -14,7 +14,7 @@
 <div style="overflow-y:auto; height:66%; margin-top:-22px;">
     <table class="table table-bordered table-hover" style="table-layout:fixed">
         <tbody>
-            <tr ng-repeat="event in events | orderBy:'epochTime' | stringContainsAllOfString:search:'searchKey'" event ng-show="search.length > 0 || event.visible">
+            <tr ng-repeat="event in events | orderBy:'epochTime' | stringContainsAllOfString:search:'searchKey'" event ng-show="(search.length > 0 || event.visible) && event.parsedStart">
             </tr>
         </tbody>
     </table>

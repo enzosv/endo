@@ -164,11 +164,11 @@ angular.module('endo')
 						if (item.start.date) {
 							epochTime = Date.parse(item.start.date);
 							item.epochTime = epochTime;
-							item.parsedStart = DateService.parse(epochTime);
+							item.parsedStart = DateService.parse(epochTime, true);
 						} else {
 							epochTime = Date.parse(item.start.dateTime);
 							item.epochTime = epochTime;
-							item.parsedStart = DateService.parse(epochTime);
+							item.parsedStart = DateService.parse(epochTime, true, true);
 						}
 						item.visible = visible;
 						item.fullParsedDate = DateService.getFullDate(epochTime);
