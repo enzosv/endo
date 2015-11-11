@@ -1,7 +1,7 @@
 {
 	"name": "Endo",
 	"description": "Todoist and Google Calendar new tab page",
-	"version": "0.0.0.11",
+	"version": "0.0.0.12",
 	"manifest_version": 2,
 	"chrome_url_overrides": {
 		"newtab": "newtab.html"

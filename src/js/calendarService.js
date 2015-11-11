@@ -31,6 +31,17 @@ angular.module('endo')
 						'Authorization': 'Bearer ' + token
 					}
 				});
+			},
+			deleteEvent: function(token, calendarId, eventId){
+				var url = "https://www.googleapis.com/calendar/v3/calendars/" + encodeURIComponent(calendarId) + "/events/" + encodeURIComponent(eventId);
+				return $http({
+					method: 'DELETE',
+					url: url,
+					headers: {
+						'Content-Type': 'application/json; charset=UTF-8',
+						'Authorization': 'Bearer ' + token
+					}
+				});
 			}
 		};
 	});

@@ -70,7 +70,7 @@ angular.module('endo')
 							} else {
 								$scope.calendars = local.calendars;
 								for (var i = 0; i < local.calendars.length; i++) {
-									processEvents(local.calendars[i].items, local.calendars[i].color, local.calendars[i].summary, local.calendars[i].visible);
+									processEvents(local.calendars[i].items, local.calendars[i].color, local.calendars[i].summary, local.calendars[i].visible, local.calendars[i].id);
 									$scope.events = $scope.events.concat(local.calendars[i].items);
 								}
 								$scope.$apply();
@@ -145,7 +145,7 @@ angular.module('endo')
 									response.data.visible = true;
 								}
 								response.data.id = id;
-								processEvents(response.data.items, color, response.data.summary, response.data.visible);
+								processEvents(response.data.items, color, response.data.summary, response.data.visible, id);
 								tempCalendars.push(response.data);
 								tempEvents = tempEvents.concat(response.data.items);
 							}
@@ -156,7 +156,7 @@ angular.module('endo')
 						});
 				}
 
-				function processEvents(items, color, summary, visible) {
+				function processEvents(items, color, summary, visible, calendarId) {
 					for (var i = 0; i < items.length; i++) {
 						var item = items[i];
 						item.color = color;
@@ -172,6 +172,7 @@ angular.module('endo')
 						}
 						item.visible = visible;
 						item.fullParsedDate = DateService.getFullDate(epochTime);
+						item.calendarId = calendarId;
 						item.searchKey = (item.parsedStart + " " + item.fullParsedDate + " " + item.summary + " " + summary)
 							.toLowerCase();
 					}
@@ -184,6 +185,15 @@ angular.module('endo')
 					chrome.storage.local.set({
 						'calendars': $scope.calendars
 					});
+				};
+
+				$scope.remove = function(event){
+					console.log(event);
+					var index = $scope.events.indexOf(event);
+					if (index > -1) {
+						$scope.events.splice(index, 1);
+						Calendar.deleteEvent(oAuthToken, event.calendarId, event.id);
+					}
 				};
 
 				function saveCalendars() {
@@ -202,11 +212,12 @@ angular.module('endo')
 				}
 
 				function getCalendarIdWithName(name) {
+					name = name.toLowerCase();
 					if(name.indexOf("-") > -1){
 						name = name.split("-").join(" ");
 					}
 					for (var i = 0; i < $scope.calendars.length; i++) {
-						if ($scope.calendars[i].summary === name) {
+						if ($scope.calendars[i].summary.toLowerCase() === name) {
 							console.log($scope.calendars[i].id);
 							return $scope.calendars[i].id;
 						}

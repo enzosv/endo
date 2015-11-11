@@ -3,7 +3,13 @@ angular.module('endo')
 		return {
 			templateUrl: "../html/event.html",
 			controller: function ($scope) {
-				// console.log($scope.event);
+				$scope.mouseenter = function () {
+					$scope.hover = true;
+				};
+
+				$scope.mouseleave = function () {
+					$scope.hover = false;
+				};
 			}
 		}
 	});
