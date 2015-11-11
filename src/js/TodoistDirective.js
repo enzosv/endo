@@ -167,6 +167,49 @@ angular.module('endo')
 					return temp_id;
 				};
 
+				function processProject(project, projectClone, projectColors) {
+					var visible;
+					if (!(project.id in projectClone)) {
+						visible = true;
+					} else {
+						visible = projectClone[project.id].visible;
+					}
+
+					if (project.name === "Inbox") {
+						$scope.projects[project.id] = {
+							"name": project.name,
+							"visible": visible,
+							"color": "#b58900"
+						};
+					} else {
+						$scope.projects[project.id] = {
+							"name": project.name,
+							"visible": visible,
+							"color": projectColors[project.color]
+						};
+					}
+				}
+
+				function processTask(item) {
+					// var item = data.Items[j];
+					item.project_name = $scope.projects[item.project_id].name;
+					item.color = $scope.projects[item.project_id].color;
+					if (item.due_date) {
+						item.parsedDate = DateService.parse(Date.parse(item.due_date));
+						item.fullParsedDate = DateService.getFullDate(item.due_date);
+						item.sortDate = Date.parse(item.due_date);
+					} else {
+						item.parsedDate = "";
+						item.fullParsedDate = "";
+						item.sortDate = 9007199254740991;
+					}
+
+
+					item.searchKey = (item.parsedDate + " " + item.fullParsedDate + " " + item.content + " #" + item.project_name)
+						.toLowerCase();
+						console.log(item);
+				}
+
 				function get() {
 					console.log("GETTING TODOIST");
 					Todoist.get($scope.token)
@@ -181,45 +224,13 @@ angular.module('endo')
 							// }
 
 							for (var i = 0; i < data.Projects.length; i++) {
-								var visible;
-								if (!(data.Projects[i].id in projectClone)) {
-									visible = true;
-								} else {
-									visible = projectClone[data.Projects[i].id].visible;
-								}
-
-								if (data.Projects[i].name === "Inbox") {
-									$scope.projects[data.Projects[i].id] = {
-										"name": data.Projects[i].name,
-										"visible": visible,
-										"color": "#b58900"
-									};
-								} else {
-									$scope.projects[data.Projects[i].id] = {
-										"name": data.Projects[i].name,
-										"visible": visible,
-										"color": projectColors[data.Projects[i].color]
-									};
-								}
-
+								processProject(data.Projects[i], projectClone, projectColors);
 							}
 							$scope.last_sync = new Date()
 								.getTime();
 
 							for (var j = 0; j < data.Items.length; j++) {
-								var item = data.Items[j];
-								item.project_name = $scope.projects[item.project_id].name;
-								item.color = $scope.projects[item.project_id].color;
-								if (item.due_date) {
-									item.parsedDate = DateService.parse(Date.parse(item.due_date));
-									item.fullParsedDate = DateService.getFullDate(item.due_date);
-								} else {
-									item.parsedDate = "";
-									item.fullParsedDate = "";
-								}
-
-								item.searchKey = (item.parsedDate + " " + item.fullParsedDate + " " + item.content + " #" + item.project_name)
-									.toLowerCase();
+								processTask(data.Items[j]);
 							}
 							// if (!seq && !seq_g) {
 							$scope.items = data.Items;

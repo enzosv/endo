@@ -5,8 +5,6 @@ angular.module('endo')
 			.getTime();
 		var isTimeless = function (date) {
 			date = new Date(date);
-			console.log(date.getHours());
-			console.log(date.getMinutes());
 			if ((date.getHours() === 0 && date.getMinutes() === 0) || (date.getHours() === 23 && date.getMinutes() === 59)) {
 				return true;
 			}
