@@ -19,9 +19,7 @@ var gulp = require('gulp'),
 var packageName = 'endo';
 
 gulp.task('minify-assets', function () {
-    var assets = useref.assets();
     return gulp.src('src/*.html')
-        .pipe(assets)
         .pipe(gulpif('*.js', ngAnnotate()))
         .pipe(gulpif('*.js', uglify()))
         .pipe(gulpif('*.css', uncss({
@@ -32,7 +30,6 @@ gulp.task('minify-assets', function () {
         })))
         // .pipe(gulpif('*.css', purify(['src/*.html'])))
         .pipe(gulpif('*.css', csso()))
-        .pipe(assets.restore())
         .pipe(useref())
         .pipe(gulp.dest(packageName));
 });
