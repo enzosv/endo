@@ -11,7 +11,14 @@ angular.module('endo')
 				});
 			},
 			listEvents: function (token, id, startTime, endTime) {
-				return $http.get("https://www.googleapis.com/calendar/v3/calendars/" + id + "/events?timeMin=" + startTime + "&timeMax=" + endTime + "&singleEvents=true&orderBy=startTime&maxAtendees=0", {
+				return $http.get("https://www.googleapis.com/calendar/v3/calendars/" + encodeURIComponent(id) + "/events", {
+					params: {
+						"timeMin": startTime,
+						"timeMax": endTime,
+						"singleEvents":true,
+						"orderBy": "startTime",
+						"maxAtendees": 0
+					},
 					headers: {
 						'Authorization': 'OAuth ' + token,
 						'Content-Type': 'application/json'
