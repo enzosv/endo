@@ -8,8 +8,7 @@ angular.module('endo')
 				$scope.items = [];
 				$scope.loginError = false;
 				var commands = [];
-				var seq = 0;
-				var seq_g = 0;
+				var sync_token = "*";
 				$scope.projects = {};
 				$scope.last_sync = 0;
 				var scheduledUpdate = false;
@@ -38,8 +37,7 @@ angular.module('endo')
 					$scope.items = [];
 					$scope.token = false;
 					commands = [];
-					seq_g = 0;
-					seq = 0;
+					sync_token = "*";
 					$scope.projects = {};
 				}
 
@@ -223,22 +221,21 @@ angular.module('endo')
 							$scope.projects = {};
 							// }
 
-							for (var i = 0; i < data.Projects.length; i++) {
-								processProject(data.Projects[i], projectClone, projectColors);
+							for (var i = 0; i < data.projects.length; i++) {
+								processProject(data.projects[i], projectClone, projectColors);
 							}
 							$scope.last_sync = new Date()
 								.getTime();
 
-							for (var j = 0; j < data.Items.length; j++) {
-								processTask(data.Items[j]);
+							for (var j = 0; j < data.items.length; j++) {
+								processTask(data.items[j]);
 							}
 							// if (!seq && !seq_g) {
-							$scope.items = data.Items;
+							$scope.items = data.items;
 							// } else {
 							// $scope.items.push.apply($scope.items, data.Items);
 							// }
-							seq = data.seq_no;
-							seq_g = data.seq_no_global;
+							sync_token = data.sync_token;
 							chrome.storage.local.set({
 								'items': $scope.items,
 								'projects': $scope.projects,
@@ -400,8 +397,7 @@ angular.module('endo')
 								commands = [];
 								// seq = data.seq_no;
 								// seq_g = data.seq_no_global;
-								seq = 0;
-								seq_g = 0;
+								sync_token = "*";
 								chrome.storage.local.set({
 									'commands': commands,
 									'items': $scope.items
@@ -418,7 +414,7 @@ angular.module('endo')
 				}
 
 				function update() {
-					if (!seq) {
+					if (sync_token == "*") {
 						get();
 					}
 					if (commands.length > 0) {

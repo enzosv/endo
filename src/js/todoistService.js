@@ -14,8 +14,7 @@ angular.module('endo')
 				return $http.get("https://todoist.com/API/v7/sync",{
 					params: {
 						token: token,
-						seq_no: 0,
-						seq_no_global: 0,
+						sync_token: "*",
 						resource_types: '["items", "projects"]'
 					}
 				});
