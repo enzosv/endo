@@ -3,7 +3,7 @@ angular.module('endo')
 	.factory('Todoist', function TodoistFactory($http) {
 		return {
 			login: function (email, password) {
-				return $http.get("https://todoist.com/API/v6/login", {
+				return $http.get("https://todoist.com/API/v7/login", {
 					params: {
 						email: email,
 						password: password
@@ -11,7 +11,7 @@ angular.module('endo')
 				});
 			},
 			get: function (token) {
-				return $http.get("https://todoist.com/API/v6/sync",{
+				return $http.get("https://todoist.com/API/v7/sync",{
 					params: {
 						token: token,
 						seq_no: 0,
@@ -21,7 +21,7 @@ angular.module('endo')
 				});
 			},
 			post: function(token, commands){
-				return $http.get("https://todoist.com/API/v6/sync", {
+				return $http.get("https://todoist.com/API/v7/sync", {
 					params: {
 						token: token,
 						commands: commands
