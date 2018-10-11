@@ -13,7 +13,7 @@
 <div style="overflow-y:auto; height:66%; margin-top:-22px;">
     <table class="table table-bordered table-hover" style="table-layout:fixed">
         <tbody>
-            <tr ng-repeat="item in items | stringContainsAllOfString:search:'searchKey' | orderBy:['sortDate', 'project_name', 'date_added']" task ng-mouseenter="mouseenter()" ng-mouseleave="mouseleave()" ng-show="search.length > 0 || projects[item.project_id].visible">
+            <tr ng-repeat="item in items | stringContainsAllOf:search:'searchKey' | orderBy:['sortDate', 'project_name', 'date_added']" task ng-mouseenter="mouseenter()" ng-mouseleave="mouseleave()" ng-show="search.length > 0 || projects[item.project_id].visible">
             </tr>
         </tbody>
     </table>
