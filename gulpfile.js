@@ -59,12 +59,6 @@ gulp.task('copy-font', function () {
         .pipe(gulp.dest(packageName + '/fonts'));
 });
 
-gulp.task('clean-crx', function () {
-    return del([
-        packageName + '.crx'
-    ]);
-});
-
 gulp.task('clean-zip', function () {
     return del([
         packageName + '.zip'
@@ -82,6 +76,6 @@ gulp.task('default', function (callback) {
 });
 
 gulp.task('recreate', function (callback) {
-    runSequence(['clean-folder', 'clean-crx', 'clean-zip'], ['minify-assets', 'minify-html', 'copy-manifest', 'copy-font'], 'zip',
+    runSequence(['clean-folder', 'clean-zip'], ['minify-assets', 'minify-html', 'copy-manifest', 'copy-font'], 'zip',
         callback);
 });
