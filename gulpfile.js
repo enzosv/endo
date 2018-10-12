@@ -76,20 +76,12 @@ gulp.task('zip', function () {
         .pipe(zip.dest(packageName + '.zip'));
 });
 
-gulp.task('replace-manifest', function () {
-    gulp.src(['src/manifest.json'])
-        .pipe(replace(/"key": ".*"/g, '"key":"<APPLICATION_KEY>"'))
-        .pipe(replace(/"client_id": ".*"/g, '"client_id":"<CLIENT_ID>.apps.googleusercontent.com"'))
-        .pipe(rename("src/sample_manifest.json"))
-        .pipe(gulp.dest(''));
-});
-
 gulp.task('default', function (callback) {
     runSequence(['minify-assets', 'minify-html'],
         callback);
 });
 
 gulp.task('recreate', function (callback) {
-    runSequence(['clean-folder', 'clean-crx', 'clean-zip'], ['minify-assets', 'minify-html', 'copy-manifest', 'copy-font'], ['zip', 'replace-manifest'],
+    runSequence(['clean-folder', 'clean-crx', 'clean-zip'], ['minify-assets', 'minify-html', 'copy-manifest', 'copy-font'], 'zip',
         callback);
 });
