@@ -1,13 +1,13 @@
 {
 	"name": "Endo",
 	"description": "Todoist and Google Calendar new tab page",
-	"version": "0.0.0.14",
+	"version": "0.0.0.17",
 	"manifest_version": 2,
 	"chrome_url_overrides": {
 		"newtab": "newtab.html"
 	},
 	"permissions": [
-		"https://todoist.com/API/v6/",
+		"https://todoist.com/API/v7/",
 		"storage",
 		"identity",
 		"https://www.googleapis.com/calendar/v3"
@@ -18,5 +18,5 @@
 			"https://www.googleapis.com/auth/calendar"
 		]
 	},
-	"key":"<APPLICATION_KEY>"
+	"key":"<PUBLIC KEY>"
 }
