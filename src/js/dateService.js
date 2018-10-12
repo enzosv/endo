@@ -17,28 +17,29 @@ angular.module('endo')
 					.getTime();
 				if (parsedDate > now) {
 					var format;
-					var tomorrow = new Date(now+86400000);
-					tomorrow.setHours(0);
-					tomorrow.setMinutes(0);
-					tomorrow = tomorrow.getTime();
-					if (parsedDate < tomorrow) {
+
+					var endOfDay = new Date();
+					endOfDay.setHours(23,59,59,999);
+
+					var endOfTomorrow = new Date();
+					endOfTomorrow.setDate(endOfTomorrow.getDate()+1);
+					endOfTomorrow.setHours(23,59,59,999);
+
+
+					if (parsedDate < endOfDay.getTime()) {
 						if (isTimeless(parsedDate) || (isEvent && !isTimed)) {
 							format = "'Today'";
 						} else {
 							format = "h:mm a";
 						}
-					} else if (parsedDate < now + 172800000) {
+					} else if (parsedDate < endOfTomorrow.getTime()) {
 						if (isTimeless(parsedDate) || (isEvent && !isTimed)) {
 							format = "'Tomorrow'";
 						} else {
 							format = "'Tomorrow' h:mm a";
 						}
-					} else if (parsedDate < now + 604800000) {
-						format = "EEE, MMM d";
-					} else if (parsedDate < now + 2592000000) {
-						format = "MMM d";
 					} else {
-						format = "MMM yyyy";
+						format = "EEE, MMM d";
 					}
 					return $filter('date')(parsedDate, format);
 				} else {
