@@ -13,22 +13,22 @@ angular.module('endo')
 				var oAuthToken;
 
 				$scope.$on("sync", function () {
-					console.log("CALENDAR RECEIVED SYNC REQUEST");
+					console.log("CALENDAR: RECEIVED SYNC REQUEST");
 					refreshCalendar();
 				});
 
 				$scope.$on("reset", function () {
-					console.log("CALENDAR RECEIVED RESET REQUEST");
+					console.log("CALENDAR: RECEIVED RESET REQUEST");
 					reset();
 				});
 
 				$scope.$on("login", function () {
-					console.log("CALENDAR RECEIVED LOGIN REQUEST");
+					console.log("CALENDAR: RECEIVED LOGIN REQUEST");
 					refreshCalendar();
 				});
 
 				$scope.$on("addEvent", function () {
-					console.log("CALENDAR RECEIVED ADD REQUEST");
+					console.log("CALENDAR: RECEIVED ADD REQUEST");
 
 					var calendarName = $scope.search.split("#");
 					var query;
@@ -79,8 +79,6 @@ angular.module('endo')
 										.getTime() - 300000) {
 										refreshCalendar();
 									} else {
-										console.log(local.calLastSync - new Date()
-											.getTime() - 300000);
 										chrome.identity.getAuthToken({
 											'interactive': true
 										}, function (token) {
@@ -98,7 +96,7 @@ angular.module('endo')
 				});
 
 				function refreshCalendar() {
-					console.log("GETTING CALENDAR");
+					console.log("CALENDAR: REFRESHING");
 					chrome.identity.getAuthToken({
 						'interactive': true
 					}, function (token) {
@@ -131,7 +129,9 @@ angular.module('endo')
 				function getEventsForId(id, color, startTime, endTime) {
 					Calendar.listEvents(oAuthToken, id, startTime, endTime)
 						.then(function (response) {
-							if (response.data.items.length > 0) {
+							var count = response.data.items.length;
+							console.log("CALENDAR: GOT " + count + " EVENTS FOR " + id)
+							if (count > 0) {
 								response.data.color = color;
 								var matchedOld = false;
 								for (var i = 0; i < $scope.calendars.length; i++) {
@@ -188,7 +188,7 @@ angular.module('endo')
 				};
 
 				$scope.remove = function(event){
-					console.log(event);
+					console.log("CALENDAR: REMOVING EVENT: " + event);
 					var index = $scope.events.indexOf(event);
 					if (index > -1) {
 						$scope.events.splice(index, 1);
@@ -218,7 +218,6 @@ angular.module('endo')
 					}
 					for (var i = 0; i < $scope.calendars.length; i++) {
 						if ($scope.calendars[i].summary.toLowerCase() === name) {
-							console.log($scope.calendars[i].id);
 							return $scope.calendars[i].id;
 						}
 					}
