@@ -15,22 +15,17 @@ var gulp = require('gulp'),
     replace = require('gulp-replace'),
     rename = require("gulp-rename"),
     changed = require('gulp-changed');
+    purify = require('gulp-purifycss');
 
 var packageName = 'endo';
 
 gulp.task('minify-assets', function () {
     return gulp.src('src/*.html')
+        .pipe(useref())
         .pipe(gulpif('*.js', ngAnnotate()))
         .pipe(gulpif('*.js', uglify()))
-        .pipe(gulpif('*.css', uncss({
-            ignore: [
-                /\.table/
-            ],
-            html: ["src/*.html", "src/html/*.html"]
-        })))
-        // .pipe(gulpif('*.css', purify(['src/*.html'])))
-        .pipe(gulpif('*.css', csso()))
-        .pipe(useref())
+        .pipe(gulpif('*.css', purify(['./src/html/*.html', './src/*.html'])))
+        .pipe(gulpif('*.css', cssnano()))
         .pipe(gulp.dest(packageName));
 });
 
