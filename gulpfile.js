@@ -84,16 +84,12 @@ gulp.task('replace-manifest', function () {
         .pipe(gulp.dest(''));
 });
 
-gulp.task('pack', shell.task([
-    '\/Applications\/Google\\ Chrome.app\/Contents\/MacOS\/Google\\ Chrome --pack-extension=\/Users\/Enzo\/Dev\/Web\/endo\/endo\/ --pack-extension-key=\/Users\/Enzo\/Dev\/Web\/endo\/endo.pem'
-]));
-
 gulp.task('default', function (callback) {
     runSequence(['minify-assets', 'minify-html'],
         callback);
 });
 
 gulp.task('recreate', function (callback) {
-    runSequence(['clean-folder', 'clean-crx', 'clean-zip'], ['minify-assets', 'minify-html', 'copy-manifest', 'copy-font'], ['pack', 'zip', 'replace-manifest'],
+    runSequence(['clean-folder', 'clean-crx', 'clean-zip'], ['minify-assets', 'minify-html', 'copy-manifest', 'copy-font'], ['zip', 'replace-manifest'],
         callback);
 });
