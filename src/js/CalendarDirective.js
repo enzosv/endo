@@ -42,7 +42,7 @@ angular.module('endo')
 								console.error(error);
 							});
 					} else {
-						Calendar.addEvent(oAuthToken, getCalendarIdWithName(calendarName), $scope.search)
+						Calendar.addEvent(oAuthToken, getCalendarIdWithName(calendarName[0]), $scope.search)
 							.then(function (response) {
 								refreshCalendar();
 							}, function (error) {
