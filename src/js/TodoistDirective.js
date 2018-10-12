@@ -14,22 +14,22 @@ angular.module('endo')
 				var scheduledUpdate = false;
 
 				$scope.$on("sync", function () {
-					console.log("TODOIST RECEIVED SYNC REQUEST");
+					console.log("TODOIST: RECEIVED SYNC REQUEST");
 					get();
 				});
 
 				$scope.$on("reset", function () {
-					console.log("TODOIST RECEIVED RESET REQUEST");
+					console.log("TODOIST: RECEIVED RESET REQUEST");
 					reset();
 				});
 
 				$scope.$on("login", function () {
-					console.log("TODOIST RECEIVED LOGIN REQUEST");
+					console.log("TODOIST: RECEIVED LOGIN REQUEST");
 					login();
 				});
 
 				$scope.$on("addTask", function () {
-					console.log("TODOIST RECEIVED ADD REQUEST");
+					console.log("TODOIST: RECEIVED ADD REQUEST");
 					add();
 				});
 
@@ -42,7 +42,6 @@ angular.module('endo')
 				}
 
 				chrome.storage.sync.get(['token', 'email'], function (sync) {
-					console.log("refresh");
 					if (sync) {
 						if (sync.token && sync.email) {
 							$scope.token = sync.token;
@@ -205,11 +204,10 @@ angular.module('endo')
 
 					item.searchKey = (item.parsedDate + " " + item.fullParsedDate + " " + item.content + " #" + item.project_name)
 						.toLowerCase();
-						console.log(item);
 				}
 
 				function get() {
-					console.log("GETTING TODOIST");
+					console.log("TODOIST: REFRESHING");
 					Todoist.get($scope.token)
 						.then(function (response) {
 							// console.log(data);
@@ -220,13 +218,14 @@ angular.module('endo')
 							projectClone = JSON.parse(JSON.stringify($scope.projects));
 							$scope.projects = {};
 							// }
-
+							console.log("TODOIST: GOT " + data.projects.length + " PROJECTS");
 							for (var i = 0; i < data.projects.length; i++) {
 								processProject(data.projects[i], projectClone, projectColors);
 							}
 							$scope.last_sync = new Date()
 								.getTime();
 
+							console.log("TODOIST: GOT " + data.items.length + " ITEMS");
 							for (var j = 0; j < data.items.length; j++) {
 								processTask(data.items[j]);
 							}
@@ -393,7 +392,6 @@ angular.module('endo')
 								// }
 								// }
 
-								console.log(data);
 								commands = [];
 								// seq = data.seq_no;
 								// seq_g = data.seq_no_global;
@@ -404,11 +402,11 @@ angular.module('endo')
 										// 'projects': $scope.projects
 								});
 								get();
-								console.log("update success");
+								console.log("todoist update success");
 							},
 							function (error) {
 								scheduledUpdate = false;
-								console.error("update error: ");
+								console.error("todist update error: ");
 								console.error(error);
 							});
 				}
