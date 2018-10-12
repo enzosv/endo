@@ -4,17 +4,11 @@ var gulp = require('gulp'),
     gulpif = require('gulp-if'),
     ngAnnotate = require('gulp-ng-annotate'),
     uglify = require('gulp-uglify'),
-    csso = require('gulp-csso'),
-    uncss = require('gulp-postcss'),
-    shell = require('gulp-shell'),
+    cssnano = require('gulp-cssnano'),
     runSequence = require('run-sequence'),
     del = require('del'),
     htmlmin = require('gulp-htmlmin'),
-    // purify = require('gulp-purifycss'),
     zip = require('gulp-vinyl-zip'),
-    replace = require('gulp-replace'),
-    rename = require("gulp-rename"),
-    changed = require('gulp-changed');
     purify = require('gulp-purifycss');
 
 var packageName = 'endo';
@@ -45,7 +39,6 @@ gulp.task('clean-folder', function () {
 
 gulp.task('copy-manifest', function () {
     return gulp.src('src/manifest.json')
-        // .pipe(uglify())
         .pipe(gulp.dest(packageName));
 });
 
