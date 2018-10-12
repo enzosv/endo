@@ -1,14 +1,10 @@
 src/bower_components
-./node_modules
+/node_modules
 *.pem
-./endo
-/endo/
 /endo
-./endo/
-./endo.zip
 endo.zip
+endo.crx
 src/manifest.json
-endo/manifest.json
 
 # OSX
 .DS_Store
