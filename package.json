@@ -5,11 +5,11 @@
   "main": "gulpfile.js",
   "dependencies": {
     "angular": "^1.4.14",
-    "node-uuid": "^1.4.3",
-    "chrono": "^1.0.2",
-    "jquery": "^2.1.4",
     "angular-timeago": "^0.2.4",
-    "mousetrap": "^1.5.3"
+    "chrono": "^1.0.2",
+    "jquery": "^3.3.1",
+    "mousetrap": "^1.5.3",
+    "node-uuid": "^1.4.3"
   },
   "devDependencies": {
     "del": "^3.0.0",
