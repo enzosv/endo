@@ -1,7 +1,7 @@
 {
-  "name": "endo-master",
+  "name": "endo",
   "version": "1.0.0",
-  "description": "Simple [Todoist](https://todoist.com/) and Google Calendar new tab page",
+  "description": "Simple Todoist and Google Calendar new tab page",
   "main": "gulpfile.js",
   "dependencies": {
     "angular": "^1.4.14",
@@ -30,5 +30,6 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "MIT",
+  "private": true
 }
