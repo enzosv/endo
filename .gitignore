@@ -1,9 +1,7 @@
-src/bower_components
 /node_modules
 *.pem
 /endo
 endo.zip
-endo.crx
 src/manifest.json
 
 # OSX
