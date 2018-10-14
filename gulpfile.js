@@ -29,22 +29,20 @@ function minifyHTML(cb) {
         .pipe(htmlmin({
             collapseWhitespace: false
         }))
-        .pipe(gulp.dest(packageName + '/html'))
+        .pipe(gulp.dest(packageName + '/html'));
     cb();
 }
 
-function cleanFolder(cb) {
-    del([
+function cleanFolder() {
+    return del([
         packageName
     ]);
-    cb();
 }
 
-function cleanZip(cb) {
-    del([
+function cleanZip() {
+    return del([
         packageName + '.zip'
     ]);
-    cb();
 }
 
 function copyManifest(cb) {
@@ -70,8 +68,7 @@ const build = gulp.series(
     gulp.parallel(minifyAssets, minifyHTML, copyManifest, copyFont)
 );
 
-exports.default = build
+exports.default = build;
 
-exports.recreate = gulp.series(
-    gulp.parallel(build, cleanZip),
-    pack);
+exports.clean = gulp.parallel(cleanFolder, cleanZip);
+exports.pack = gulp.series(pack);
