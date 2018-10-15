@@ -105,7 +105,9 @@ angular.module('endo')
 							.then(function (response) {
 
 								var calendars = response.data.items;
-								var startTime = new Date();
+								var date = new Date();
+								var timezoneOffsetInMS = date.getTimezoneOffset()*60000
+								var startTime = new Date(date.setTime(date.getTime()-timezoneOffsetInMS));
 								startTime.setHours(0);
 								startTime.setMinutes(0);
 								startTime.setSeconds(0);
