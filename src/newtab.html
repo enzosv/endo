@@ -30,8 +30,10 @@
 <body ng-controller="MainController" id="MainController">
     <div style="width:98%; margin:0 auto; margin-top:1%;" ng-show="loggedIn">
         <div style="width:80%; margin:0 auto;">
-            <input type="text" style="width: calc(100% - {{search ? '64' : '0'}}px)" class="form-control pull-left mousetrap" placeholder="Search" ng-model="search" id="searchField">
-            <input type="button" style="width:56px;" class="btn btn-default pull-right" value="Add" ng-click="add()" ng-show="search">
+            <input type="text" style="width: calc(100% - {{search ? '64' : '0'}}px)" class="form-control pull-left mousetrap"
+                placeholder="Search" ng-model="search" id="searchField">
+            <input type="button" style="width:56px;" class="btn btn-default pull-right" value="Add" ng-click="add()"
+                ng-show="search">
             <br><small ng-hide="search" class="pull-right">[alt-s]</small><small ng-show="search" class="pull-right">[alt-enter]</small>
         </div>
         <br>
@@ -47,10 +49,13 @@
         Last Synced: {{last_sync | timeAgo}}
         <a href="" ng-click="sync()">Sync</a>
         <br> {{email}} <a href="" ng-click="reset()">Logout</a>
-        <br> For edits, visit <a href="https://todoist.com/app">Todoist</a> or <a href="http://calendar.google.com/">Google Calendar</a>
+        <br> For edits, visit <a href="https://todoist.com/app">Todoist</a> or <a href="http://calendar.google.com/">Google
+            Calendar</a>
     </center>
     <form ng-hide="loggedIn" class="form-horizontal" ng-submit="mainLogin()" style="margin-top:10%; width:30%; margin:0 auto">
-        <h3><center>A <a href="https://todoist.com/app">Todoist</a> new tab page</center></h3>
+        <h3>
+            <center>A <a href="https://todoist.com/app">Todoist</a> new tab page</center>
+        </h3>
         <center>by <a href="https://github.com/enzosv">enzosv</a></center>
         <div class="alert alert-danger" role="alert" ng-show="loginError">
             {{loginError}}

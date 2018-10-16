@@ -13,10 +13,10 @@
 		"https://www.googleapis.com/calendar/v3"
 	],
 	"oauth2": {
-		"client_id":"<CLIENT_ID>.apps.googleusercontent.com",
+		"client_id": "<CLIENT_ID>.apps.googleusercontent.com",
 		"scopes": [
 			"https://www.googleapis.com/auth/calendar"
 		]
 	},
-	"key":"<PUBLIC KEY>"
+	"key": "<PUBLIC KEY>"
 }
