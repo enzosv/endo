@@ -13,6 +13,34 @@ angular.module('endo').factory('DateService', function DateFactory ($filter) {
     return false
   }
   return {
+    rfc3339FromDate: function (date) {
+      // 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z
+      var month = (date.getMonth() + 1).toString() // getMonth() is zero-based
+      var day = date.getDate().toString()
+      var hour = date.getHours().toString()
+      var minute = date.getMinutes().toString()
+      var second = date.getSeconds().toString()
+      var timezoneOffsetInHours = (function () {
+        var hoursOffset = date.getTimezoneOffset() / 60
+        var sign = Math.sign(hoursOffset) === -1 ? '-' : ''
+        return sign + new Array(hoursOffset.size)
+          .concat([Math.abs(hoursOffset)])
+          .join('0').slice(-hoursOffset.size) + ':00'
+      })()
+      return [date.getFullYear(),
+        '-',
+        month.padStart(2, '0'),
+        '-',
+        day.padStart(2, '0'),
+        'T',
+        hour.padStart(2, '0'),
+        ':',
+        minute.padStart(2, '0'),
+        ':',
+        second.padStart(2, '0'),
+        timezoneOffsetInHours
+      ].join('')
+    },
     parse: function (date, isEvent, isTimed) {
       var parsedDate = new Date(date).getTime()
       if (parsedDate > now) {

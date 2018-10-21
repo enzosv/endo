@@ -95,31 +95,6 @@ angular.module('endo')
           }
         })
 
-        function startingRFC3339FromDate (date) {
-          // 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z
-          var mm = date.getMonth() + 1 // getMonth() is zero-based
-          var dd = date.getDate()
-          var timezoneOffsetInHours = date.getTimezoneOffset() / 60
-          if (timezoneOffsetInHours < 0 && timezoneOffsetInHours > -10) {
-            timezoneOffsetInHours = '-0' + Math.abs(timezoneOffsetInHours)
-          } else if (timezoneOffsetInHours > 0) {
-            if (timezoneOffsetInHours < 9) {
-              timezoneOffsetInHours = '+0' + timezoneOffsetInHours
-            } else {
-              timezoneOffsetInHours = '+' + timezoneOffsetInHours
-            }
-          }
-          return [date.getFullYear(),
-            '-',
-            (mm > 9 ? '' : '0') + mm,
-            '-',
-            (dd > 9 ? '' : '0') + dd,
-            'T00:00:00',
-            timezoneOffsetInHours,
-            ':00'
-          ].join('')
-        }
-
         function refreshCalendar () {
           console.log('CALENDAR: REFRESHING')
           chrome.identity.getAuthToken({
@@ -129,11 +104,22 @@ angular.module('endo')
             Calendar.listCalendars(token)
               .then(function (response) {
                 var calendars = response.data.items
-                var startTime = startingRFC3339FromDate(new Date())
-                console.log(startTime)
-                var endTime = new Date()
-                endTime.setDate(endTime.getDate() + 14)
-                endTime = startingRFC3339FromDate(endTime)
+
+                var startTime = (function () {
+                  var date = new Date()
+                  date.setHours(0)
+                  date.setMinutes(0)
+                  date.setSeconds(0)
+                  return DateService.rfc3339FromDate(date)
+                })()
+                var endTime = (function () {
+                  var date = new Date()
+                  date.setDate(date.getDate() + 14)
+                  date.setHours(23)
+                  date.setMinutes(59)
+                  date.setSeconds(59)
+                  return DateService.rfc3339FromDate(date)
+                })()
                 calendarCount = calendars.length
                 calendarsLoaded = 0
                 tempEvents = []
