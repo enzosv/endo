@@ -42,8 +42,12 @@ angular.module('endo').factory('DateService', function DateFactory ($filter) {
         })()
         return $filter('date')(parsedDate, format)
       } else {
-        var dateString = $filter('timeAgo')(date)
-        return dateString.charAt(0).toUpperCase() + dateString.slice(1)
+        if (isTimed) {
+          var dateString = $filter('timeAgo')(date)
+          return dateString.charAt(0).toUpperCase() + dateString.slice(1)
+        } else {
+          return 'Today'
+        }
       }
     },
     getFullDate: function (date) {

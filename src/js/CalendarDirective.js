@@ -95,6 +95,31 @@ angular.module('endo')
           }
         })
 
+        function startingRFC3339FromDate (date) {
+          // 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z
+          var mm = date.getMonth() + 1 // getMonth() is zero-based
+          var dd = date.getDate()
+          var timezoneOffsetInHours = date.getTimezoneOffset() / 60
+          if (timezoneOffsetInHours < 0 && timezoneOffsetInHours > -10) {
+            timezoneOffsetInHours = '-0' + Math.abs(timezoneOffsetInHours)
+          } else if (timezoneOffsetInHours > 0) {
+            if (timezoneOffsetInHours < 9) {
+              timezoneOffsetInHours = '+0' + timezoneOffsetInHours
+            } else {
+              timezoneOffsetInHours = '+' + timezoneOffsetInHours
+            }
+          }
+          return [date.getFullYear(),
+            '-',
+            (mm > 9 ? '' : '0') + mm,
+            '-',
+            (dd > 9 ? '' : '0') + dd,
+            'T00:00:00',
+            timezoneOffsetInHours,
+            ':00'
+          ].join('')
+        }
+
         function refreshCalendar () {
           console.log('CALENDAR: REFRESHING')
           chrome.identity.getAuthToken({
@@ -104,16 +129,11 @@ angular.module('endo')
             Calendar.listCalendars(token)
               .then(function (response) {
                 var calendars = response.data.items
-                var date = new Date()
-                var timezoneOffsetInMS = date.getTimezoneOffset() * 60000
-                var startTime = new Date(date.setTime(date.getTime() - timezoneOffsetInMS))
-                startTime.setHours(0)
-                startTime.setMinutes(0)
-                startTime.setSeconds(0)
-                startTime = startTime.toISOString()
+                var startTime = startingRFC3339FromDate(new Date())
+                console.log(startTime)
                 var endTime = new Date()
                 endTime.setDate(endTime.getDate() + 14)
-                endTime = endTime.toISOString()
+                endTime = startingRFC3339FromDate(endTime)
                 calendarCount = calendars.length
                 calendarsLoaded = 0
                 tempEvents = []
