@@ -63,6 +63,11 @@ function pack (cb) {
   cb()
 }
 
+gulp.task('default', gulp.series(
+  cleanFolder,
+  gulp.parallel(minifyAssets, minifyHTML, copyManifest, copyFont)
+))
+
 const build = gulp.series(
   cleanFolder,
   gulp.parallel(minifyAssets, minifyHTML, copyManifest, copyFont)
