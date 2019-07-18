@@ -1,9 +1,9 @@
 'use strict'
 angular.module('endo')
-  .directive('calendar', function () {
+  .directive('calendar', function() {
     return {
       templateUrl: '../html/calendar.html',
-      controller: function ($scope, Calendar, DateService) {
+      controller: function($scope, Calendar, DateService) {
         $scope.calendars = []
         $scope.events = []
         var calendarCount = 0
@@ -12,22 +12,22 @@ angular.module('endo')
         var tempCalendars = []
         var oAuthToken
 
-        $scope.$on('sync', function () {
+        $scope.$on('sync', function() {
           console.log('CALENDAR: RECEIVED SYNC REQUEST')
           refreshCalendar()
         })
 
-        $scope.$on('reset', function () {
+        $scope.$on('reset', function() {
           console.log('CALENDAR: RECEIVED RESET REQUEST')
           reset()
         })
 
-        $scope.$on('login', function () {
+        $scope.$on('login', function() {
           console.log('CALENDAR: RECEIVED LOGIN REQUEST')
           refreshCalendar()
         })
 
-        $scope.$on('addEvent', function () {
+        $scope.$on('addEvent', function() {
           console.log('CALENDAR: RECEIVED ADD REQUEST')
 
           var calendarName = $scope.search.split('#')
@@ -36,23 +36,23 @@ angular.module('endo')
             calendarName = calendarName[1].split(' ')[0]
             query = $scope.search.replace('#' + calendarName, '')
             Calendar.addEvent(oAuthToken, getCalendarIdWithName(calendarName), query)
-              .then(function (response) {
+              .then(function(response) {
                 refreshCalendar()
-              }, function (error) {
+              }, function(error) {
                 console.error(error)
               })
           } else {
             Calendar.addEvent(oAuthToken, getCalendarIdWithName(calendarName[0]), $scope.search)
-              .then(function (response) {
+              .then(function(response) {
                 refreshCalendar()
-              }, function (error) {
+              }, function(error) {
                 console.error(error)
               })
           }
           $scope.search = ''
         })
 
-        function reset () {
+        function reset() {
           $scope.calendars = []
           $scope.events = []
           calendarCount = 0
@@ -62,7 +62,7 @@ angular.module('endo')
           oAuthToken = ''
         }
 
-        chrome.storage.local.get(['calendars', 'calLastSync'], function (local) {
+        chrome.storage.local.get(['calendars', 'calLastSync'], function(local) {
           if (local) {
             if (local.calendars) {
               if (local.calendars.length === 0) {
@@ -79,9 +79,7 @@ angular.module('endo')
                     .getTime() - 300000) {
                     refreshCalendar()
                   } else {
-                    chrome.identity.getAuthToken({
-                      'interactive': true
-                    }, function (token) {
+                    Calendar.authenticate(function(token) {
                       oAuthToken = token
                     })
                   }
@@ -95,24 +93,22 @@ angular.module('endo')
           }
         })
 
-        function refreshCalendar () {
+        function refreshCalendar() {
           console.log('CALENDAR: REFRESHING')
-          chrome.identity.getAuthToken({
-            'interactive': true
-          }, function (token) {
+          Calendar.authenticate(function(token) {
             oAuthToken = token
             Calendar.listCalendars(token)
-              .then(function (response) {
+              .then(function(response) {
                 var calendars = response.data.items
 
-                var startTime = (function () {
+                var startTime = (function() {
                   var date = new Date()
                   date.setHours(0)
                   date.setMinutes(0)
                   date.setSeconds(0)
                   return DateService.rfc3339FromDate(date)
                 })()
-                var endTime = (function () {
+                var endTime = (function() {
                   var date = new Date()
                   date.setDate(date.getDate() + 14)
                   date.setHours(23)
@@ -127,15 +123,15 @@ angular.module('endo')
                 for (var i = 0; i < calendars.length; i++) {
                   getEventsForId(calendars[i].id, calendars[i].backgroundColor, startTime, endTime)
                 }
-              }, function (error) {
+              }, function(error) {
                 console.error(error)
               })
           })
         }
 
-        function getEventsForId (id, color, startTime, endTime) {
+        function getEventsForId(id, color, startTime, endTime) {
           Calendar.listEvents(oAuthToken, id, startTime, endTime)
-            .then(function (response) {
+            .then(function(response) {
               var count = response.data.items.length
               console.log('CALENDAR: GOT ' + count + ' EVENTS FOR ' + id)
               if (count > 0) {
@@ -157,13 +153,13 @@ angular.module('endo')
                 tempEvents = tempEvents.concat(response.data.items)
               }
               saveCalendars()
-            }, function (error) {
+            }, function(error) {
               saveCalendars()
               console.error(error)
             })
         }
 
-        function processEvents (items, color, summary, visible, calendarId) {
+        function processEvents(items, color, summary, visible, calendarId) {
           for (var i = 0; i < items.length; i++) {
             var item = items[i]
             item.color = color
@@ -185,7 +181,7 @@ angular.module('endo')
           }
         }
 
-        $scope.saveVisibility = function (calendar) {
+        $scope.saveVisibility = function(calendar) {
           for (var i = 0; i < calendar.items.length; i++) {
             calendar.items[i].visible = calendar.visible
           }
@@ -194,7 +190,7 @@ angular.module('endo')
           })
         }
 
-        $scope.remove = function (event) {
+        $scope.remove = function(event) {
           console.log('CALENDAR: REMOVING EVENT: ' + event)
           var index = $scope.events.indexOf(event)
           if (index > -1) {
@@ -203,7 +199,7 @@ angular.module('endo')
           }
         }
 
-        function saveCalendars () {
+        function saveCalendars() {
           calendarsLoaded++
           if (calendarsLoaded === calendarCount) {
             // if ($scope.events !== tempEvents) {
@@ -218,7 +214,7 @@ angular.module('endo')
           }
         }
 
-        function getCalendarIdWithName (name) {
+        function getCalendarIdWithName(name) {
           name = name.toLowerCase()
           if (name.indexOf('-') > -1) {
             name = name.split('-').join(' ')

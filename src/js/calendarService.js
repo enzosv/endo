@@ -1,8 +1,22 @@
 'use strict'
 angular.module('endo')
-  .factory('Calendar', function CalendarFactory ($http) {
+  .factory('Calendar', function CalendarFactory($http) {
     return {
-      listCalendars: function (token) {
+      authenticate: function(callback) {
+        var clientID = "723413737382-r7prh8e4qcqng9j0bkqi9lagm14q3h13.apps.googleusercontent.com"
+        var authURL = "https://accounts.google.com/o/oauth2/auth"
+        authURL += "?client_id=" + clientID
+        authURL += "&response_type=token"
+        authURL += "&redirect_uri=" + chrome.identity.getRedirectURL()
+        authURL += "&scope=https://www.googleapis.com/auth/calendar"
+        chrome.identity.launchWebAuthFlow({
+          url: authURL,
+          interactive: true
+        }, function(responseURL) {
+          callback(responseURL.match(/\#(?:access_token)\=([\S\s]*?)\&/)[1])
+        })
+      },
+      listCalendars: function(token) {
         return $http.get('https://www.googleapis.com/calendar/v3/users/me/calendarList', {
           headers: {
             'Authorization': 'OAuth ' + token,
@@ -10,7 +24,7 @@ angular.module('endo')
           }
         })
       },
-      listEvents: function (token, id, startTime, endTime) {
+      listEvents: function(token, id, startTime, endTime) {
         return $http.get('https://www.googleapis.com/calendar/v3/calendars/' + encodeURIComponent(id) + '/events', {
           params: {
             'timeMin': startTime,
@@ -25,7 +39,7 @@ angular.module('endo')
           }
         })
       },
-      addEvent: function (token, calendarId, text) {
+      addEvent: function(token, calendarId, text) {
         if (!calendarId) {
           calendarId = 'primary'
         }
@@ -39,7 +53,7 @@ angular.module('endo')
           }
         })
       },
-      deleteEvent: function (token, calendarId, eventId) {
+      deleteEvent: function(token, calendarId, eventId) {
         var url = 'https://www.googleapis.com/calendar/v3/calendars/' + encodeURIComponent(calendarId) + '/events/' + encodeURIComponent(eventId)
         return $http({
           method: 'DELETE',
