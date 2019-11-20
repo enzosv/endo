@@ -4,7 +4,7 @@
   "description": "Simple Todoist and Google Calendar new tab page",
   "main": "gulpfile.js",
   "dependencies": {
-    "angular": "^1.4.14",
+    "angular": "^1.7.9",
     "angular-stringcontains": "0.0.1",
     "angular-timeago": "^0.2.4",
     "chrono": "^1.0.2",
